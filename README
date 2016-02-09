@@ -1,0 +1,11 @@
+#################################################
+#												#
+# 			MyScript Cloud Java Sample 			#
+#												#
+#################################################
+
+0) Minimum Requirements: jdk 1.7 and maven2
+
+1) Change your applicationKey in src/com/myscript/cloud/sample/MyScriptCloudSample.java
+
+2) mvn clean compile assembly:single exec:exec
