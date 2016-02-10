@@ -1,5 +1,6 @@
 package com.myscript.cloud.sample.ws;
 
+import alexwilton.handwritingAssistant.StrokeAnalyser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -21,8 +22,7 @@ public class MyScriptCloud {
     private final String applicationKey;
     private final ObjectMapper mapper = new ObjectMapper();
     private String recognitionCloudURL;
-    private List<Stroke> aggregator = new ArrayList<Stroke>();
-    private RecognitionListener listener;
+    private StrokeAnalyser strokeAnalyser;
 
     public MyScriptCloud(final String recognitionCloudURL, final String applicationKey) {
         this.recognitionCloudURL = recognitionCloudURL;
@@ -129,28 +129,10 @@ public class MyScriptCloud {
     }
 
     public void addStroke(Stroke s) {
-        aggregator.add(s);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Stroke[] strokes = aggregator.toArray(new Stroke[aggregator.size()]);
-                String recognized = null;
-                try {
-                    recognized = recognize(strokes);
-                } catch (IOException e) {
-                    // keep recognized null so that notifyListeners will notify an error
-                    // status
-                    recognized = null;
-                } finally {
-                    if (listener != null) {
-                        listener.recognitionResult(recognized);
-                    }
-                }
-            }
-        }).run();
+        strokeAnalyser.addStroke(s);
     }
 
-    public void setListener(RecognitionListener listener) {
-        this.listener = listener;
+    public void setStrokeAnalyser(StrokeAnalyser strokeAnalyser) {
+        this.strokeAnalyser = strokeAnalyser;
     }
 }

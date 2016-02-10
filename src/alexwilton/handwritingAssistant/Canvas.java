@@ -29,7 +29,7 @@ public class Canvas extends JComponent implements MouseListener, MouseMotionList
     private MyScriptCloud text;
     private Exercise exercise = null;
 
-    public Canvas(MyScriptCloud text) {
+public Canvas(MyScriptCloud text) {
         addMouseListener(this);
         addMouseMotionListener(this);
         setDoubleBuffered(true);

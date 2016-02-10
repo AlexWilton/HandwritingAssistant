@@ -1,25 +1,18 @@
 package alexwilton.handwritingAssistant.exercises;
 
-import alexwilton.handwritingAssistant.Canvas;
 import alexwilton.handwritingAssistant.HandWritingAssistant;
 
 import java.awt.*;
 
 public abstract class Exercise {
-    private Canvas canvas;
     private String instruction;
     private String textToCopy;
 
-    public Exercise(Canvas canvas, String instruction, String textToCopy) {
-        this.canvas = canvas;
+    public Exercise(String instruction, String textToCopy) {
         this.instruction = instruction;
         this.textToCopy = textToCopy;
     }
 
-    public void displayExercise(){
-        canvas.setExercise(this); //
-
-    }
 
     public void draw(Graphics2D g) {
         g.setColor(Color.BLUE);
@@ -31,6 +24,12 @@ public abstract class Exercise {
         g.drawString(textToCopy, calculateXforCentringString(g, textToCopy), 150);
 
         drawLines(g);
+
+        highlightWords(g);
+    }
+
+    private void highlightWords(Graphics2D g) {
+
     }
 
     private void drawLines(Graphics2D g) {
