@@ -130,21 +130,24 @@ public class MyScriptCloud {
 
     public void addStroke(Stroke s) {
         aggregator.add(s);
-
-        // TODO do it in a separate thread
-        Stroke[] strokes = aggregator.toArray(new Stroke[aggregator.size()]);
-        String recognized = null;
-        try {
-            recognized = recognize(strokes);
-        } catch (IOException e) {
-            // keep recognized null so that notifyListeners will notify an error
-            // status
-            recognized = null;
-        } finally {
-            if (listener != null) {
-                listener.recognitionResult(recognized);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Stroke[] strokes = aggregator.toArray(new Stroke[aggregator.size()]);
+                String recognized = null;
+                try {
+                    recognized = recognize(strokes);
+                } catch (IOException e) {
+                    // keep recognized null so that notifyListeners will notify an error
+                    // status
+                    recognized = null;
+                } finally {
+                    if (listener != null) {
+                        listener.recognitionResult(recognized);
+                    }
+                }
             }
-        }
+        }).run();
     }
 
     public void setListener(RecognitionListener listener) {

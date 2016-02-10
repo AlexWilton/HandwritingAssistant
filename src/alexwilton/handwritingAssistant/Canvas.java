@@ -17,8 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Canvas extends JComponent implements MouseListener, MouseMotionListener {
-    private static final Color BACKGROUND_COLOR = new Color(0xFF, 0xFF, 0xBF);
-    private static final Color STROKE_COLOR = new Color(0x00, 0x00, 0xFF);
+    private static final Color BACKGROUND_COLOR = Color.WHITE;
+    private static final Color STROKE_COLOR = Color.BLACK;
     private static final java.awt.Stroke STROKE_STYLE = new BasicStroke(3,BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
     private static final java.awt.Stroke DRAWING_STROKE_STYLE = new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 
@@ -69,6 +69,7 @@ public class Canvas extends JComponent implements MouseListener, MouseMotionList
         }
 
         if(exercise != null) exercise.draw(g);
+
     }
 
     private void drawPoints(Graphics2D g, List<Point> points) {
