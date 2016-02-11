@@ -36,11 +36,11 @@ public class HandWritingAssistant extends JFrame{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 
-		MyScriptCloud text = new MyScriptCloud(RECOGNITION_CLOUD_URL, APPLICATION_KEY, HMAC_KEY);
-		canvas = new Canvas(text);
+		MyScriptCloud myScriptInterface = new MyScriptCloud(RECOGNITION_CLOUD_URL, APPLICATION_KEY, HMAC_KEY);
+        strokeAnalyser = new StrokeAnalyser(currentExercise, myScriptInterface);
+        canvas = new Canvas(strokeAnalyser);
         canvas.setExercise(currentExercise);
-        strokeAnalyser = new StrokeAnalyser(currentExercise, text);
-        text.setStrokeAnalyser(strokeAnalyser);
+
 		add(canvas, BorderLayout.CENTER);
         addButtons();
 	}

@@ -26,14 +26,14 @@ public class Canvas extends JComponent implements MouseListener, MouseMotionList
     private boolean drawing;
     private List<Point> pendingPoints = new ArrayList<Point>();
     private Graphics2D g;
-    private MyScriptCloud text;
+    private StrokeAnalyser strokeAnalyser;
     private Exercise exercise = null;
 
-public Canvas(MyScriptCloud text) {
+public Canvas(StrokeAnalyser strokeAnalyser) {
         addMouseListener(this);
         addMouseMotionListener(this);
         setDoubleBuffered(true);
-        this.text = text;
+        this.strokeAnalyser = strokeAnalyser;
     }
 
     @Override
@@ -139,7 +139,7 @@ public Canvas(MyScriptCloud text) {
     }
 
     private void triggerRecognizer(Stroke s) {
-        text.addStroke(s);
+        strokeAnalyser.addStroke(s);
     }
 
     public void mouseMoved(MouseEvent arg0) {

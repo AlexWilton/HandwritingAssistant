@@ -22,7 +22,6 @@ public class MyScriptCloud {
     private final String applicationKey, hmacKey;
     private final ObjectMapper mapper = new ObjectMapper();
     private String recognitionCloudURL;
-    private StrokeAnalyser strokeAnalyser;
 
     public MyScriptCloud(final String recognitionCloudURL, final String applicationKey, final String hmacKey) {
         this.recognitionCloudURL = recognitionCloudURL;
@@ -129,11 +128,4 @@ public class MyScriptCloud {
         return jsonWriter.toString();
     }
 
-    public void addStroke(Stroke s) {
-        strokeAnalyser.addStroke(s);
-    }
-
-    public void setStrokeAnalyser(StrokeAnalyser strokeAnalyser) {
-        this.strokeAnalyser = strokeAnalyser;
-    }
 }
