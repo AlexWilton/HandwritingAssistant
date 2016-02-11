@@ -13,8 +13,9 @@ import com.myscript.cloud.sample.ws.RecognitionListener;
 
 public class HandWritingAssistant extends JFrame{
 
-	private static final String APPLICATION_KEY = "c34e7a84-a0da-41cb-84f8-b2cf8459c3df";
+	private static final String APPLICATION_KEY = "c34e7a84-a0da-41cb-84f8-b2cf8459c3df"; //"22eda92c-10af-40d8-abea-fd4093c17d81"
 	private static final String RECOGNITION_CLOUD_URL = "http://cloud.myscript.com/api/v3.0/recognition/rest/text/doSimpleRecognition.json";
+	private static final String HMAC_KEY = "667dc91d-ce7a-4074-a74e-a4ea0a8455b8"; //"a1fa759f-b3ce-4091-9fd4-d34bb870c601";
 
 	private Canvas canvas;
 
@@ -35,7 +36,7 @@ public class HandWritingAssistant extends JFrame{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 
-		MyScriptCloud text = new MyScriptCloud(RECOGNITION_CLOUD_URL, APPLICATION_KEY);
+		MyScriptCloud text = new MyScriptCloud(RECOGNITION_CLOUD_URL, APPLICATION_KEY, HMAC_KEY);
 		canvas = new Canvas(text);
         canvas.setExercise(currentExercise);
         strokeAnalyser = new StrokeAnalyser(currentExercise, text);

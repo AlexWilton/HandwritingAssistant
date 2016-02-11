@@ -19,14 +19,15 @@ import java.util.List;
 
 public class MyScriptCloud {
     protected static final String UTF_8 = "UTF-8";
-    private final String applicationKey;
+    private final String applicationKey, hmacKey;
     private final ObjectMapper mapper = new ObjectMapper();
     private String recognitionCloudURL;
     private StrokeAnalyser strokeAnalyser;
 
-    public MyScriptCloud(final String recognitionCloudURL, final String applicationKey) {
+    public MyScriptCloud(final String recognitionCloudURL, final String applicationKey, final String hmacKey) {
         this.recognitionCloudURL = recognitionCloudURL;
         this.applicationKey = applicationKey;
+        this.hmacKey = hmacKey;
         this.mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -87,9 +88,9 @@ public class MyScriptCloud {
         HttpURLConnection connection = openConnection(new URL(recognitionCloudURL));
         OutputStream output = connection.getOutputStream();
 
-        output.write(String.format("applicationKey=%s&textInput=", applicationKey, input).getBytes(UTF_8));
+//        System.out.println("Sent: " + String.format("applicationKey=%s&hmacKey=%s&textInput=%s", applicationKey, hmacKey, input));
 
- //       System.out.println("Data posted : " + input);
+        output.write(String.format("applicationKey=%s&hmacKey=%s&textInput=%s", applicationKey, hmacKey, input).getBytes(UTF_8));
 
         String postData = getPostData(input);
         output.write(postData.getBytes(UTF_8));

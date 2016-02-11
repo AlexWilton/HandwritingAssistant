@@ -29,7 +29,7 @@ public class StrokeAnalyser implements RecognitionListener {
                     Stroke[] strokeArray = (Stroke[]) incomingStrokes.toArray(new Stroke[]{});
                     String recognized = myScriptCloud.recognize(strokeArray);
                     recognitionResult(recognized);
-                } catch (IOException e) { System.err.println("Couldn't recognise strokes. IO error.");}
+                } catch (IOException e) { System.err.println("Couldn't recognise strokes. IO error: " + e.getMessage());}
             }
         }).run();
     }
