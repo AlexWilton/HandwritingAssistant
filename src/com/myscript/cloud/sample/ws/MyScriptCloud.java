@@ -10,7 +10,6 @@ import com.myscript.cloud.sample.ws.api.Stroke;
 import com.myscript.cloud.sample.ws.api.text.TextInput;
 import com.myscript.cloud.sample.ws.api.text.TextOutput;
 import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft_10;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.simple.JSONObject;
 
@@ -138,16 +137,17 @@ public class MyScriptCloud {
         WebSocketClient webSocketClient = new WebSocketClient( new URI( "wss://cloud.myscript.com/api/v3.0/recognition/ws/text" ), new Draft_10() )
         {
             @Override
+            public void onOpen(ServerHandshake serverHandshake) {
+                System.out.println( "opened connection" );
+            }
+
+            @Override
             public void onMessage( String message ) {
 //                JSONPObject obj = new JSONPObject(message);
 //                String channel = obj.getString("channel");
                 System.out.println("Message Received: " + message);
             }
 
-            @Override
-            public void onOpen( ServerHandshake handshake ) {
-                System.out.println( "opened connection" );
-            }
 
             @Override
             public void onClose( int code, String reason, boolean remote ) {
