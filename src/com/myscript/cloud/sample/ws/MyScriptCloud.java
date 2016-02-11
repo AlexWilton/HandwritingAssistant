@@ -4,16 +4,18 @@ import alexwilton.handwritingAssistant.StrokeAnalyser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.myscript.cloud.sample.ws.api.Point;
 import com.myscript.cloud.sample.ws.api.Stroke;
 import com.myscript.cloud.sample.ws.api.text.TextInput;
 import com.myscript.cloud.sample.ws.api.text.TextOutput;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.drafts.Draft_10;
+import org.java_websocket.handshake.ServerHandshake;
+import org.json.simple.JSONObject;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,6 +128,71 @@ public class MyScriptCloud {
             e.printStackTrace();
         }
         return jsonWriter.toString();
+    }
+
+
+
+
+    @SuppressWarnings("Duplicates")
+    public String recognizeUsingWebSockets(Stroke[] strokes) throws Exception {
+        WebSocketClient webSocketClient = new WebSocketClient( new URI( "wss://cloud.myscript.com/api/v3.0/recognition/ws/text" ), new Draft_10() )
+        {
+            @Override
+            public void onMessage( String message ) {
+//                JSONPObject obj = new JSONPObject(message);
+//                String channel = obj.getString("channel");
+                System.out.println("Message Received: " + message);
+            }
+
+            @Override
+            public void onOpen( ServerHandshake handshake ) {
+                System.out.println( "opened connection" );
+            }
+
+            @Override
+            public void onClose( int code, String reason, boolean remote ) {
+                System.out.println( "closed connection" );
+            }
+
+            @Override
+            public void onError( Exception ex ) {
+                ex.printStackTrace();
+            }
+
+        };
+        final String input = getTextInput(strokes);
+
+//        HttpURLConnection connection = openConnection(new URL(recognitionCloudURL));
+//        OutputStream output = connection.getOutputStream();
+        byte[] encodedStrToSend = String.format("applicationKey=%s&hmacKey=%s&textInput=%s", applicationKey, hmacKey, input).getBytes(UTF_8);
+        webSocketClient.connect();
+        JSONObject init1 = new JSONObject();
+        init1.put("type","applicationKey"); init1.put("applicationKey", applicationKey);
+        webSocketClient.send(init1.toJSONString());
+
+//        webSocketClient.send(encodedStrToSend);
+//        webSocketClient.close();
+
+//        output.write(String.format("applicationKey=%s&hmacKey=%s&textInput=%s", applicationKey, hmacKey, input).getBytes(UTF_8));
+//
+//        String postData = getPostData(input);
+//        output.write(postData.getBytes(UTF_8));
+//        output.flush();
+//        output.close();
+
+//        int responseCode = connection.getResponseCode();
+//        InputStream responseStream = (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) ? connection.getErrorStream() : connection.getInputStream();
+//
+//        String json = URLDecoder.decode(readResponse(responseStream), UTF_8);
+//
+//        if (responseCode == HttpURLConnection.HTTP_OK) {
+//            System.out.println("Response OK : " + json);
+//            return getTextOutput(json);
+//        } else {
+//            System.err.println("HTTP Error: " + responseCode + " " + connection.getResponseMessage());
+//            return null;
+//        }
+        return "testing!!!";
     }
 
 }

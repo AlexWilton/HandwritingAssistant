@@ -25,9 +25,9 @@ public class StrokeAnalyser implements RecognitionListener {
             public void run() {
                 try {
                     Stroke[] strokeArray = incomingStrokes.toArray(new Stroke[]{});
-                    String recognized = myScriptInterface.recognize(strokeArray);
+                    String recognized = myScriptInterface.recognizeUsingWebSockets(strokeArray); //myScriptInterface.recognize(strokeArray);
                     recognitionResult(recognized);
-                } catch (IOException e) { System.err.println("Couldn't recognise strokes. IO error: " + e.getMessage());}
+                } catch (Exception e) { System.err.println("Couldn't recognise strokes. Exception: " + e.getClass().getSimpleName() + " Message: " + e.getMessage());}
             }
         }).run();
     }
