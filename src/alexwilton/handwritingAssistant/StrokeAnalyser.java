@@ -2,7 +2,7 @@ package alexwilton.handwritingAssistant;
 
 
 import alexwilton.handwritingAssistant.exercises.Exercise;
-import com.myscript.cloud.sample.ws.MyScriptCloud;
+
 import com.myscript.cloud.sample.ws.RecognitionListener;
 import com.myscript.cloud.sample.ws.api.Stroke;
 
@@ -11,12 +11,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class StrokeAnalyser implements RecognitionListener {
     private Exercise exercise;
-    private MyScriptCloud myScriptInterface;
+    private MyScriptConnection myScriptConnection;
     private ConcurrentLinkedQueue<Stroke> incomingStrokes = new ConcurrentLinkedQueue<>();
 
-    public StrokeAnalyser(Exercise exercise, MyScriptCloud myScriptInterface) {
+    public StrokeAnalyser(Exercise exercise, MyScriptConnection myScriptConnection) {
         this.exercise = exercise;
-        this.myScriptInterface = myScriptInterface;
+        this.myScriptConnection = myScriptConnection;
     }
 
     public void analyseStrokes(){
@@ -25,8 +25,8 @@ public class StrokeAnalyser implements RecognitionListener {
             public void run() {
                 try {
                     Stroke[] strokeArray = incomingStrokes.toArray(new Stroke[]{});
-                    String recognized = myScriptInterface.recognize(strokeArray);
-                    recognitionResult(recognized);
+                    myScriptConnection.recognizeStrokes(strokeArray);
+
                 } catch (Exception e) { System.err.println("Couldn't recognise strokes. Exception: " + e.getClass().getSimpleName() + " Message: " + e.getMessage());}
             }
         }).run();
