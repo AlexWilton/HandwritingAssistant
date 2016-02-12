@@ -24,7 +24,6 @@ import java.util.concurrent.CountDownLatch;
 
 @ClientEndpoint
 public class MyScriptConnection {
-    private CountDownLatch latch;
     private MessageHandler messageHandler;
     Session userSession = null;
     private ObjectMapper mapper = new ObjectMapper();
@@ -74,32 +73,31 @@ public class MyScriptConnection {
                 init2.put("applicationKey", applicationKey);
                 init2.put("challenge", challenge);
                 init2.put("hmac", hmac);
-                System.out.println("Response sent: " + init2.toJSONString());
                 sendMessage(init2.toJSONString());
                 break;
             case "init":
                 break;
             case "textResult":
-//                JSONObject txtSegmentResult = ((JSONObject)msg.get("result"))
-                System.out.println("Result received: " + getTextOutput(jsonMsg));
+                if(messageHandler != null)
+                    messageHandler.handleMessage(jsonMsg);
+                else
+                    System.out.println("Result received: " + getTextOutput(jsonMsg));
                 sendResetRequest();
                 break;
         }
     }
 
-    private void sendResetRequest() {
-        switch (status){
-            case DISCONNECTED: connect();
-            case BUSY:
-                while(status != ConnectionStatus.READY){}
-        }
+    private synchronized void sendResetRequest() {
+        waitForReady();
         JSONObject reset = new JSONObject();
         reset.put("type", "reset");
         System.out.println("Sent: Reset Request");
         sendMessage(reset.toJSONString());
+        notify();
     }
 
-    private void sendStartRecogRequest(Stroke[] strokes){
+    private synchronized void sendStartRecogRequest(Stroke[] strokes){
+        waitForReady();
         JSONObject start1 = getTextInput(strokes);
         start1.put("type", "start");
         JSONObject textParam = new JSONObject();
@@ -107,8 +105,24 @@ public class MyScriptConnection {
         textParam.put("textInputMode", "CURSIVE");
         textParam.put("textProperties", new JSONObject());
         start1.put("textParameter", textParam);
-        System.out.println("Response sent: " + start1.toJSONString());
         sendMessage(start1.toJSONString());
+        notify();
+    }
+
+    private synchronized void waitForReady(){
+        switch (status){
+            case DISCONNECTED: connect();
+            case BUSY:
+                while(status != ConnectionStatus.READY){
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    };
+                }
+                break;
+            case READY: break;
+        }
     }
 
     protected String getTextOutput(String json) {
@@ -148,7 +162,10 @@ public class MyScriptConnection {
         this.messageHandler = msgHandler;
     }
     public void sendMessage(String message) {
-        this.userSession.getAsyncRemote().sendText(message);
+        synchronized (this) {
+            System.out.println("Sent: " + message);
+            this.userSession.getAsyncRemote().sendText(message);
+        }
     }
 
     public void recognizeStrokes(Stroke[] strokeArray) {
@@ -186,6 +203,9 @@ public class MyScriptConnection {
         }
     }
 
+    public interface MessageHandler{
+        void handleMessage(String message);
+    }
 
 
     public static void main( String[] args ) throws URISyntaxException, InterruptedException {

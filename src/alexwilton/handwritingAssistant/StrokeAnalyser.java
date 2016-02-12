@@ -17,6 +17,16 @@ public class StrokeAnalyser implements RecognitionListener {
     public StrokeAnalyser(Exercise exercise, MyScriptConnection myScriptConnection) {
         this.exercise = exercise;
         this.myScriptConnection = myScriptConnection;
+        setupMessageHandler();
+    }
+
+    private void setupMessageHandler() {
+        myScriptConnection.addMessageHandler(new MyScriptConnection.MessageHandler() {
+            @Override
+            public void handleMessage(String message) {
+                System.out.println("The MEssage!!: " + message);
+            }
+        });
     }
 
     public void analyseStrokes(){
