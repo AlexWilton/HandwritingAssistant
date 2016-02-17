@@ -55,9 +55,18 @@ public class HandWritingAssistant extends JFrame{
                 strokeAnalyser.analyseStrokes();
             }
         });
+        Button debugBtn = new Button("Debug");
+        debugBtn.addMouseListener(new MouseAdapter(){
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                strokeAnalyser.debug();
+            }
+        });
         Panel btnPanel = new Panel();
         btnPanel.setLayout(new GridLayout(5,1));
         btnPanel.add(analyseBtn);
+        btnPanel.add(debugBtn);
         add(btnPanel, BorderLayout.EAST);
     }
 

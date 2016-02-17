@@ -63,7 +63,7 @@
 //        }
 //    }
 //
-//    protected String getTextOutput(String json) {
+//    protected String getTextOutputResult(String json) {
 //
 //        Reader jsonReader = new StringReader(json);
 //        TextOutput output = null;
@@ -111,7 +111,7 @@
 //
 //        if (responseCode == HttpURLConnection.HTTP_OK) {
 //            System.out.println("Response OK : " + json);
-//            return getTextOutput(json);
+//            return getTextOutputResult(json);
 //        } else {
 //            System.err.println("HTTP Error: " + responseCode + " " + connection.getResponseMessage());
 //            return null;

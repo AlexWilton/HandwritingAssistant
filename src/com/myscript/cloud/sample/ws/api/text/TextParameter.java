@@ -9,7 +9,7 @@ public class TextParameter {
 
 	public TextParameter() {
 		this.resultDetail = "TEXT";
-		this.language = "en_US";
+		this.language = "en_GB"; //"en_US";
 	}
 
 	public String getResultDetail() {

@@ -21,6 +21,8 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @ClientEndpoint
 public class MyScriptConnection {
@@ -28,8 +30,10 @@ public class MyScriptConnection {
     Session userSession = null;
     private ObjectMapper mapper = new ObjectMapper();
     private String applicationKey, hmacKey, myScriptURL;
+    private String currentInstanceId = null;
+    private Lock communicationInProcessLock = new ReentrantLock();
 
-    enum ConnectionStatus { DISCONNECTED, READY, BUSY}
+    enum ConnectionStatus { DISCONNECTED, READY_TO_START, STARTED}
     private ConnectionStatus status = ConnectionStatus.DISCONNECTED;
 
     public MyScriptConnection(String applicationKey, String hmacKey, String myScriptURL){
@@ -53,7 +57,7 @@ public class MyScriptConnection {
         }
     }
     @OnOpen
-    public void onOpen(Session userSession) {this.userSession = userSession; status = ConnectionStatus.READY;}
+    public void onOpen(Session userSession) {this.userSession = userSession;}
     @OnClose
     public void onClose(Session userSession, CloseReason reason) {
         this.userSession = null;
@@ -76,27 +80,29 @@ public class MyScriptConnection {
                 sendMessage(init2.toJSONString());
                 break;
             case "init":
+            case "reset":
+                status = ConnectionStatus.READY_TO_START;
                 break;
             case "textResult":
+                TextOutput textOutput = getTextOutputs(jsonMsg);
+                currentInstanceId = textOutput.getInstanceId();
                 if(messageHandler != null)
                     messageHandler.handleMessage(jsonMsg);
                 else
-                    System.out.println("Result received: " + getTextOutput(jsonMsg));
+                    System.out.println("Result received: " + getTextOutputResult(jsonMsg));
                 sendResetRequest();
                 break;
         }
     }
 
-    private synchronized void sendResetRequest() {
-        waitForReady();
+    public void sendResetRequest() {
         JSONObject reset = new JSONObject();
         reset.put("type", "reset");
-        System.out.println("Sent: Reset Request");
         sendMessage(reset.toJSONString());
-        notify();
+        currentInstanceId = null;
     }
 
-    private synchronized void sendStartRecogRequest(Stroke[] strokes){
+    private void sendStartRecogRequest(Stroke[] strokes){
         waitForReady();
         JSONObject start1 = getTextInput(strokes);
         start1.put("type", "start");
@@ -105,27 +111,44 @@ public class MyScriptConnection {
         textParam.put("textInputMode", "CURSIVE");
         textParam.put("textProperties", new JSONObject());
         start1.put("textParameter", textParam);
+        status = ConnectionStatus.STARTED;
         sendMessage(start1.toJSONString());
-        notify();
+
     }
 
-    private synchronized void waitForReady(){
+    private void sendContinueRecogRequest(Stroke[] strokes){
+        waitForReady();
+        JSONObject start1 = getTextInput(strokes);
+        start1.put("type", "continue");
+        start1.put("instanceId", currentInstanceId);
+        sendMessage(start1.toJSONString());
+
+    }
+
+
+    private void waitForReady(){
         switch (status){
             case DISCONNECTED: connect();
-            case BUSY:
-                while(status != ConnectionStatus.READY){
+            case STARTED:
+                while(status != ConnectionStatus.READY_TO_START){
                     try {
-                        wait();
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
-                    };
+                    }
                 }
                 break;
-            case READY: break;
+            case READY_TO_START: break;
         }
     }
 
-    protected String getTextOutput(String json) {
+    public String getTextOutputResult(String json) {
+        TextOutput output = getTextOutputs(json);
+        final int selectedCandidateIdx = output.getResult().getTextSegmentResult().getSelectedCandidateIdx();
+        return output.getResult().getTextSegmentResult().getCandidates().get(selectedCandidateIdx).getLabel();
+    }
+
+    public TextOutput getTextOutputs(String json) {
 
         Reader jsonReader = new StringReader(json);
         TextOutput output = null;
@@ -134,8 +157,7 @@ public class MyScriptConnection {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        final int selectedCandidateIdx = output.getResult().getTextSegmentResult().getSelectedCandidateIdx();
-        return output.getResult().getTextSegmentResult().getCandidates().get(selectedCandidateIdx).getLabel();
+        return output;
     }
 
     private JSONObject getTextInput(Stroke[] strokes) {
@@ -162,13 +184,26 @@ public class MyScriptConnection {
         this.messageHandler = msgHandler;
     }
     public void sendMessage(String message) {
-        synchronized (this) {
-            System.out.println("Sent: " + message);
-            this.userSession.getAsyncRemote().sendText(message);
-        }
+        System.out.println(message);
+        this.userSession.getAsyncRemote().sendText(message);
     }
 
-    public void recognizeStrokes(Stroke[] strokeArray) {
+    private Lock recognizeStrokesLock = new ReentrantLock();
+
+    /**
+     * Recognise one array of stroke at a time. (Use lock for concurrency control)
+     * @param strokeArray Strokes to analyse
+     * @param messageHandler Method to deal with response.
+     */
+    public void recognizeStrokes(Stroke[] strokeArray, final MessageHandler messageHandler) {
+//        recognizeStrokesLock.lock();
+        addMessageHandler(new MessageHandler(){
+            @Override
+            public void handleMessage(String message) {
+//                recognizeStrokesLock.unlock();
+                messageHandler.handleMessage(message);
+            }
+        });
         sendStartRecogRequest(strokeArray);
     }
 
@@ -205,29 +240,6 @@ public class MyScriptConnection {
 
     public interface MessageHandler{
         void handleMessage(String message);
-    }
-
-
-    public static void main( String[] args ) throws URISyntaxException, InterruptedException {
-        String applicationKey = "c34e7a84-a0da-41cb-84f8-b2cf8459c3df";
-        String hmacKey = "667dc91d-ce7a-4074-a74e-a4ea0a8455b8";
-        String url = "ws://cloud.myscript.com/api/v3.0/recognition/ws/text";
-
-        JSONObject init1 = new JSONObject();
-        init1.put("type", "applicationKey");
-        init1.put("applicationKey", applicationKey);
-        System.out.println(init1.toJSONString());
-
-        MyScriptConnection clientEndPoint = new MyScriptConnection(applicationKey, hmacKey, url);
-//        clientEndPoint.addMessageHandler(new MyScriptConnection.MessageHandler() {
-//            public void handleMessage(String message) {
-//                System.out.println("Message Received: " + message);
-//            }
-//        });
-        clientEndPoint.sendMessage(init1.toJSONString());
-        CountDownLatch latch = new CountDownLatch(1);
-        latch.await();
-
     }
 
 }
