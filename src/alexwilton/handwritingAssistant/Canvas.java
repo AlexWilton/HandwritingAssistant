@@ -161,4 +161,8 @@ public Canvas(StrokeAnalyser strokeAnalyser) {
         this.exercise = exercise;
     }
 
+//    public void repaint(){
+//
+//    }
+
 }

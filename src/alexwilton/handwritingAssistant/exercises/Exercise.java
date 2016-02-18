@@ -1,12 +1,15 @@
 package alexwilton.handwritingAssistant.exercises;
 
 import alexwilton.handwritingAssistant.HandWritingAssistant;
+import alexwilton.handwritingAssistant.Word;
 
 import java.awt.*;
+import java.util.Set;
 
 public abstract class Exercise {
     private String instruction;
     private String textToCopy;
+    private Set<Word> highlightedWords;
 
     public Exercise(String instruction, String textToCopy) {
         this.instruction = instruction;
@@ -24,12 +27,18 @@ public abstract class Exercise {
         g.drawString(textToCopy, calculateXforCentringString(g, textToCopy), 150);
 
         drawLines(g);
-
         highlightWords(g);
     }
 
-    private void highlightWords(Graphics2D g) {
 
+    private void highlightWords(Graphics2D g) {
+        if(highlightedWords == null) return;
+
+        for(Word word : highlightedWords){
+            g.setColor(new Color(231, 76, 60, 60));
+            g.setStroke(new BasicStroke());
+            g.fillRect(word.getX(), word.getY(), word.getWidth(), word.getHeight());
+        }
     }
 
     private void drawLines(Graphics2D g) {
@@ -46,5 +55,14 @@ public abstract class Exercise {
 
     private static int calculateXforCentringString(Graphics2D g, String strToCentre){
         return HandWritingAssistant.getScreenDimension().width/2 - g.getFontMetrics().stringWidth(strToCentre)/2;
+    }
+
+
+    public Set<Word> getHighlightedWords() {
+        return highlightedWords;
+    }
+
+    public void setHighlightedWords(Set<Word> highlightedWords) {
+        this.highlightedWords = highlightedWords;
     }
 }

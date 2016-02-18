@@ -8,7 +8,6 @@ import javax.swing.JFrame;
 
 import alexwilton.handwritingAssistant.exercises.Exercise;
 import alexwilton.handwritingAssistant.exercises.Exercise1;
-import com.myscript.cloud.sample.ws.RecognitionListener;
 
 public class HandWritingAssistant extends JFrame{
 
@@ -40,6 +39,7 @@ public class HandWritingAssistant extends JFrame{
         myScriptConnection = new MyScriptConnection(APPLICATION_KEY, HMAC_KEY, RECOGNITION_CLOUD_URL);
         strokeAnalyser = new StrokeAnalyser(currentExercise, myScriptConnection);
         canvas = new Canvas(strokeAnalyser);
+        strokeAnalyser.setCanvas(canvas);
         canvas.setExercise(currentExercise);
 
 		add(canvas, BorderLayout.CENTER);
@@ -55,18 +55,18 @@ public class HandWritingAssistant extends JFrame{
                 strokeAnalyser.analyseStrokes();
             }
         });
-        Button debugBtn = new Button("Debug");
-        debugBtn.addMouseListener(new MouseAdapter(){
+        Button highlightWords = new Button("highlightWords");
+        highlightWords.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                strokeAnalyser.debug();
+                strokeAnalyser.highlightWords();
             }
         });
         Panel btnPanel = new Panel();
         btnPanel.setLayout(new GridLayout(5,1));
         btnPanel.add(analyseBtn);
-        btnPanel.add(debugBtn);
+        btnPanel.add(highlightWords);
         add(btnPanel, BorderLayout.EAST);
     }
 
