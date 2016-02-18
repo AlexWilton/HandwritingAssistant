@@ -63,10 +63,20 @@ public class HandWritingAssistant extends JFrame{
                 strokeAnalyser.highlightWords();
             }
         });
+        Button clearBtn = new Button("Clear");
+        clearBtn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                currentExercise.setHighlightedWords(null);
+                canvas.repaint();
+            }
+        });
         Panel btnPanel = new Panel();
         btnPanel.setLayout(new GridLayout(5,1));
         btnPanel.add(analyseBtn);
         btnPanel.add(highlightWords);
+        btnPanel.add(clearBtn);
         add(btnPanel, BorderLayout.EAST);
     }
 

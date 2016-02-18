@@ -3,6 +3,7 @@ package alexwilton.handwritingAssistant;
 public class Word {
     private int x,y,width,height;
     private String text;
+    private static final int CONTAINS_FUDGE_FACTOR = 5;
 
     public Word(int x, int y, int width, int height, String text) {
         this.x = x;
@@ -30,5 +31,24 @@ public class Word {
 
     public String getText() {
         return text;
+    }
+
+    /**
+     * Check whether word contains another word by checking 4 corners
+     * @param word
+     * @return
+     */
+    public boolean contains(Word word) {
+        int[][] pts = {{word.x, word.y}, {word.x, word.y+height}, {word.x+width, word.y}, {word.x+width, word.y+height}};
+        for(int[] pt : pts) {
+            if (contains(pt[0], pt[1])) return true;
+        }
+        return false;
+    }
+
+    public boolean contains(int ptX, int ptY){
+        if(!(x < ptX+CONTAINS_FUDGE_FACTOR && ptX-CONTAINS_FUDGE_FACTOR < x + width )) return false;
+        if(!(y < ptY+CONTAINS_FUDGE_FACTOR &&  ptY-CONTAINS_FUDGE_FACTOR < y + height )) return false;
+        return true;
     }
 }

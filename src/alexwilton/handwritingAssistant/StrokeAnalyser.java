@@ -57,24 +57,33 @@ public class StrokeAnalyser {
 
 
     public void highlightWords(){
-
         //extract words
-        Stroke[] strokes = incomingStrokes.toArray(new Stroke[]{});
+        Stroke[] strokes = incomingStrokes.toArray(new Stroke[incomingStrokes.size()]);
         HashMap<Stroke, Word> words = new HashMap<>();
         HashMap<Stroke, Integer> maxLengthStartingAtStroke = new HashMap<>();
-        for(Pair<Stroke> key : strokeRangeToText.keySet()){
-            String value = strokeRangeToText.get(key);
-            int currentMaxLength = maxLengthStartingAtStroke.getOrDefault(key, 0);
-            if(!value.contains(" ") && value.length() > currentMaxLength){
-                maxLengthStartingAtStroke.put(key.getX(), value.length());
-                Word word = extractWordFromStrokes(strokes, key, value);
-                words.put(key.getX(), word);
+        for(Pair<Stroke> strokeKey : strokeRangeToText.keySet()){
+            String text = strokeRangeToText.get(strokeKey);
+            int currentMaxLength = maxLengthStartingAtStroke.getOrDefault(strokeKey, 0);
+            if(!text.contains(" ") && text.length() > currentMaxLength){
+                maxLengthStartingAtStroke.put(strokeKey.getX(), text.length());
+                Word word = extractWordFromStrokes(strokes, strokeKey, text);
+                removeWordsContaining(word, words);
+                words.put(strokeKey.getX(), word);
             }
         }
 
         //highlight words
         exercise.setHighlightedWords(new HashSet<>(words.values()));
         canvas.repaint();
+    }
+
+    private void removeWordsContaining(Word newWord, HashMap<Stroke, Word> wordMap) {
+        Set<Stroke> keysToRemove = new HashSet<>();
+        for(Stroke key : wordMap.keySet()){
+            Word word = wordMap.get(key);
+            if(newWord.contains(word)) keysToRemove.add(key);
+        }
+        for(Stroke key : keysToRemove) wordMap.remove(key);
     }
 
     private Word extractWordFromStrokes(Stroke[] strokes, Pair<Stroke> strokeBounds, String text) {
@@ -105,9 +114,9 @@ public class StrokeAnalyser {
         try {
             myScriptConnection.recognizeStrokes(strokes, new MyScriptConnection.MessageHandler() {
                 @Override
-                public void handleMessage(String message) {
-                    strokeRangeToText.put(new Pair<>(strokes[0], strokes[strokes.length-1]), message);
-                    System.out.println(myScriptConnection.getTextOutputResult(message));
+                public void handleMessage(String json) {
+                    String text = myScriptConnection.getTextOutputResult(json);
+                    strokeRangeToText.put(new Pair<>(strokes[0], strokes[strokes.length-1]), text);
                 }
             });
 

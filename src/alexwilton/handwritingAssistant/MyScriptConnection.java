@@ -66,7 +66,7 @@ public class MyScriptConnection {
     }
     @OnMessage
     public void onMessage(String jsonMsg) {
-        System.out.println("Message received: " + jsonMsg);
+//        System.out.println("Message received: " + jsonMsg);
         JSONObject msg = (JSONObject) JSONValue.parse(jsonMsg);
         switch ((String) msg.get("type")){
             case "hmacChallenge": //compute response and send it
@@ -184,11 +184,9 @@ public class MyScriptConnection {
         this.messageHandler = msgHandler;
     }
     public void sendMessage(String message) {
-        System.out.println(message);
+//        System.out.println(message);
         this.userSession.getAsyncRemote().sendText(message);
     }
-
-    private Lock recognizeStrokesLock = new ReentrantLock();
 
     /**
      * Recognise one array of stroke at a time. (Use lock for concurrency control)
@@ -196,11 +194,9 @@ public class MyScriptConnection {
      * @param messageHandler Method to deal with response.
      */
     public void recognizeStrokes(Stroke[] strokeArray, final MessageHandler messageHandler) {
-//        recognizeStrokesLock.lock();
         addMessageHandler(new MessageHandler(){
             @Override
             public void handleMessage(String message) {
-//                recognizeStrokesLock.unlock();
                 messageHandler.handleMessage(message);
             }
         });
