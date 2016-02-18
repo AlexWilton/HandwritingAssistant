@@ -5,7 +5,11 @@ import alexwilton.handwritingAssistant.exercises.Exercise;
 
 import com.myscript.cloud.sample.ws.api.Box;
 import com.myscript.cloud.sample.ws.api.Stroke;
+import org.apache.commons.math3.geometry.euclidean.threed.Line;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
+import java.awt.*;
+import java.awt.geom.Line2D;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -57,6 +61,76 @@ public class StrokeAnalyser {
 
 
     public void highlightWords(){
+        double minDistance = 5;
+        //Group strokes together based on distance
+        Stroke[] strokes = incomingStrokes.toArray(new Stroke[incomingStrokes.size()]);
+        ArrayList<Set<Stroke>> strokeGroups = new ArrayList<>();
+        for(Stroke stroke : strokes){
+            Set<Stroke> closetStrokeGroup = null;
+            double closetStrokeDist = 0;
+            for(Set<Stroke> sGroup : strokeGroups){
+                for(Stroke s : sGroup){
+                    double dist = minDistanceBetweenStrokes(stroke, s);
+                    if(dist < closetStrokeDist){
+                        closetStrokeDist = dist;
+                        closetStrokeGroup = sGroup;
+                    }
+                }
+            }
+            if(closetStrokeDist > minDistance){
+                Set<Stroke> newGroup = new HashSet<>();
+                newGroup.add(stroke);
+                strokeGroups.add(newGroup);
+            }else{
+                if(closetStrokeGroup == null){
+                    closetStrokeGroup = new HashSet<Stroke>();
+                    strokeGroups.add(closetStrokeGroup);
+                }
+                closetStrokeGroup.add(stroke);
+            }
+        }
+
+        HashSet<Word> words = new HashSet<>();
+        for(Set<Stroke> strokeSet : strokeGroups){
+            Stroke[] sArray = (Stroke[]) strokeSet.toArray(new Stroke[strokeSet.size()]);
+            words.add(extractWordFromStrokes(sArray, new Pair<>(sArray[0], sArray[sArray.length - 1]), ""));
+        }
+        exercise.setHighlightedWords(words);
+        canvas.repaint();
+    }
+
+    private double minDistanceBetweenStrokes(Stroke s1, Stroke s2){
+        int[] s1center = s1.getCenterPt();
+        int[] s2center = s2.getCenterPt();
+
+        Line2D centerTocenterLine = new Line2D.Float(s1center[0], s1center[1], s2center[0], s2center[1]);
+        Line2D.Float s1CloserSide = null;
+        double minDistS1SidesToS2Center= Float.MAX_VALUE;
+        for(Line2D.Float side : s1.getRectSides()){
+            double distToS2 = side.ptLineDist(s2center[0], s2center[1]);
+            if(distToS2 < minDistS1SidesToS2Center){
+                minDistS1SidesToS2Center = distToS2;
+                s1CloserSide = side;
+            }
+        }
+
+        Line2D.Float s2CloserSide = null; double minDistS2SidesToS1Center= Float.MAX_VALUE;
+        for(Line2D.Float side : s2.getRectSides()){
+            double distToS1 = side.ptLineDist(s1center[0], s1center[1]);
+            if(distToS1 < minDistS2SidesToS1Center){
+                minDistS2SidesToS1Center = distToS1;
+                s2CloserSide = side;
+            }
+        }
+
+        assert s1CloserSide != null;
+        assert s2CloserSide != null;
+        double dist1 = s1CloserSide.ptLineDist(s2CloserSide.getP1());
+        double dist2 = s1CloserSide.ptLineDist(s2CloserSide.getP2());
+        return (dist1 > dist2) ? dist1 : dist2;
+    }
+
+    public void oldHighlightWords(){
         //extract words
         Stroke[] strokes = incomingStrokes.toArray(new Stroke[incomingStrokes.size()]);
         HashMap<Stroke, Word> words = new HashMap<>();
