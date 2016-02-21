@@ -141,6 +141,10 @@ public Canvas(StrokeAnalyser strokeAnalyser) {
         strokeAnalyser.addStroke(s);
     }
 
+    public void clearStrokes(){
+        strokes = new ArrayList<>();
+    }
+
     public void mouseMoved(MouseEvent arg0) {
     }
 

@@ -3,13 +3,9 @@ package alexwilton.handwritingAssistant;
 
 import alexwilton.handwritingAssistant.exercises.Exercise;
 
-import com.myscript.cloud.sample.ws.api.Box;
+import com.myscript.cloud.sample.ws.api.*;
 import com.myscript.cloud.sample.ws.api.Stroke;
-import org.apache.commons.math3.geometry.euclidean.threed.Line;
-import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
-import java.awt.*;
-import java.awt.geom.Line2D;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -30,24 +26,6 @@ public class StrokeAnalyser {
 
 
     public void analyseStrokes(){
-//        List<Stroke> strokes = new LinkedList<>();
-//        strokes.add(incomingStrokes.poll());
-//        while(!incomingStrokes.isEmpty()){
-//            /*Reset stroke list if new word found*/
-//            if(strokes.size() > 0 && strokeRangeToText.getOrDefault(new Pair(strokes.get(0), strokes.get(strokes.size() - 1)), "").contains(" ")) {
-//                strokes = new LinkedList<>(); continue;
-//            }
-//            strokes.add(incomingStrokes.poll());
-//            int sizeBefore = strokeRangeToText.size();
-//            analyseStroke(strokes.toArray(new Stroke[]{}));
-//            while(strokeRangeToText.size() == sizeBefore){
-//                try {
-//                    Thread.sleep(1000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
         Stroke[] strokes = incomingStrokes.toArray(new Stroke[]{});
         for(int startIndex=0; startIndex<strokes.length; startIndex++){
             for(int endIndex=startIndex; endIndex<strokes.length; endIndex++){
@@ -61,13 +39,13 @@ public class StrokeAnalyser {
 
 
     public void highlightWords(){
-        double minDistance = 5;
+        double minDistance = 30;
         //Group strokes together based on distance
         Stroke[] strokes = incomingStrokes.toArray(new Stroke[incomingStrokes.size()]);
         ArrayList<Set<Stroke>> strokeGroups = new ArrayList<>();
         for(Stroke stroke : strokes){
             Set<Stroke> closetStrokeGroup = null;
-            double closetStrokeDist = 0;
+            double closetStrokeDist = Double.MAX_VALUE;
             for(Set<Stroke> sGroup : strokeGroups){
                 for(Stroke s : sGroup){
                     double dist = minDistanceBetweenStrokes(stroke, s);
@@ -92,7 +70,7 @@ public class StrokeAnalyser {
 
         HashSet<Word> words = new HashSet<>();
         for(Set<Stroke> strokeSet : strokeGroups){
-            Stroke[] sArray = (Stroke[]) strokeSet.toArray(new Stroke[strokeSet.size()]);
+            Stroke[] sArray = strokeSet.toArray(new Stroke[strokeSet.size()]);
             words.add(extractWordFromStrokes(sArray, new Pair<>(sArray[0], sArray[sArray.length - 1]), ""));
         }
         exercise.setHighlightedWords(words);
@@ -100,65 +78,25 @@ public class StrokeAnalyser {
     }
 
     private double minDistanceBetweenStrokes(Stroke s1, Stroke s2){
-        int[] s1center = s1.getCenterPt();
-        int[] s2center = s2.getCenterPt();
-
-        Line2D centerTocenterLine = new Line2D.Float(s1center[0], s1center[1], s2center[0], s2center[1]);
-        Line2D.Float s1CloserSide = null;
-        double minDistS1SidesToS2Center= Float.MAX_VALUE;
-        for(Line2D.Float side : s1.getRectSides()){
-            double distToS2 = side.ptLineDist(s2center[0], s2center[1]);
-            if(distToS2 < minDistS1SidesToS2Center){
-                minDistS1SidesToS2Center = distToS2;
-                s1CloserSide = side;
+        double minDistance  = Double.MAX_VALUE;
+        for(Point pt1 : s1.getPoints()){
+            for(Point pt2 : s2.getPoints()){
+                double dist = Math.hypot(pt1.x - pt2.x, pt1.y - pt2.y);
+                if(dist < minDistance) minDistance = dist;
             }
         }
-
-        Line2D.Float s2CloserSide = null; double minDistS2SidesToS1Center= Float.MAX_VALUE;
-        for(Line2D.Float side : s2.getRectSides()){
-            double distToS1 = side.ptLineDist(s1center[0], s1center[1]);
-            if(distToS1 < minDistS2SidesToS1Center){
-                minDistS2SidesToS1Center = distToS1;
-                s2CloserSide = side;
-            }
-        }
-
-        assert s1CloserSide != null;
-        assert s2CloserSide != null;
-        double dist1 = s1CloserSide.ptLineDist(s2CloserSide.getP1());
-        double dist2 = s1CloserSide.ptLineDist(s2CloserSide.getP2());
-        return (dist1 > dist2) ? dist1 : dist2;
+        return minDistance;
     }
 
-    public void oldHighlightWords(){
-        //extract words
-        Stroke[] strokes = incomingStrokes.toArray(new Stroke[incomingStrokes.size()]);
-        HashMap<Stroke, Word> words = new HashMap<>();
-        HashMap<Stroke, Integer> maxLengthStartingAtStroke = new HashMap<>();
-        for(Pair<Stroke> strokeKey : strokeRangeToText.keySet()){
-            String text = strokeRangeToText.get(strokeKey);
-            int currentMaxLength = maxLengthStartingAtStroke.getOrDefault(strokeKey, 0);
-            if(!text.contains(" ") && text.length() > currentMaxLength){
-                maxLengthStartingAtStroke.put(strokeKey.getX(), text.length());
-                Word word = extractWordFromStrokes(strokes, strokeKey, text);
-                removeWordsContaining(word, words);
-                words.put(strokeKey.getX(), word);
-            }
-        }
-
-        //highlight words
-        exercise.setHighlightedWords(new HashSet<>(words.values()));
-        canvas.repaint();
-    }
-
-    private void removeWordsContaining(Word newWord, HashMap<Stroke, Word> wordMap) {
-        Set<Stroke> keysToRemove = new HashSet<>();
-        for(Stroke key : wordMap.keySet()){
-            Word word = wordMap.get(key);
-            if(newWord.contains(word)) keysToRemove.add(key);
-        }
-        for(Stroke key : keysToRemove) wordMap.remove(key);
-    }
+//
+//    private void removeWordsContaining(Word newWord, HashMap<Stroke, Word> wordMap) {
+//        Set<Stroke> keysToRemove = new HashSet<>();
+//        for(Stroke key : wordMap.keySet()){
+//            Word word = wordMap.get(key);
+//            if(newWord.contains(word)) keysToRemove.add(key);
+//        }
+//        for(Stroke key : keysToRemove) wordMap.remove(key);
+//    }
 
     private Word extractWordFromStrokes(Stroke[] strokes, Pair<Stroke> strokeBounds, String text) {
         int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, maxX = 0, maxY = 0;
@@ -190,6 +128,7 @@ public class StrokeAnalyser {
                 @Override
                 public void handleMessage(String json) {
                     String text = myScriptConnection.getTextOutputResult(json);
+                    System.out.println("Text Rec: " + text);
                     strokeRangeToText.put(new Pair<>(strokes[0], strokes[strokes.length-1]), text);
                 }
             });
@@ -201,5 +140,9 @@ public class StrokeAnalyser {
 
     public void setCanvas(Canvas canvas) {
         this.canvas = canvas;
+    }
+
+    public void clearStroke(){
+        incomingStrokes = new ConcurrentLinkedQueue<>();
     }
 }

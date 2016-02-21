@@ -42,7 +42,7 @@ public class MyScriptConnection {
         this.myScriptURL = myScriptURL;
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        connect();
+//        connect();
     }
     private void connect(){
         try {
@@ -66,7 +66,7 @@ public class MyScriptConnection {
     }
     @OnMessage
     public void onMessage(String jsonMsg) {
-//        System.out.println("Message received: " + jsonMsg);
+        System.out.println("Message received: " + jsonMsg);
         JSONObject msg = (JSONObject) JSONValue.parse(jsonMsg);
         switch ((String) msg.get("type")){
             case "hmacChallenge": //compute response and send it
@@ -184,7 +184,7 @@ public class MyScriptConnection {
         this.messageHandler = msgHandler;
     }
     public void sendMessage(String message) {
-//        System.out.println(message);
+        System.out.println(message);
         this.userSession.getAsyncRemote().sendText(message);
     }
 

@@ -69,6 +69,8 @@ public class HandWritingAssistant extends JFrame{
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
                 currentExercise.setHighlightedWords(null);
+                canvas.clearStrokes();
+                strokeAnalyser.clearStroke();
                 canvas.repaint();
             }
         });
