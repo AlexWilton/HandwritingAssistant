@@ -3,6 +3,8 @@ package alexwilton.handwritingAssistant;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.TextEvent;
+import java.awt.event.TextListener;
 
 import javax.swing.JFrame;
 
@@ -74,10 +76,22 @@ public class HandWritingAssistant extends JFrame{
                 canvas.repaint();
             }
         });
+        final TextField wordSeperatingDistance = new TextField();
+        wordSeperatingDistance.addTextListener(new TextListener() {
+            @Override
+            public void textValueChanged(TextEvent e) {
+                try {
+                    int newVal = Integer.parseInt(wordSeperatingDistance.getText());
+                    strokeAnalyser.setWordSeperatingDistance(newVal);
+                }catch (NumberFormatException nfe){}
+            }
+        });
+        wordSeperatingDistance.setText(strokeAnalyser.getWordSeperatingDistance() + "");
         Panel btnPanel = new Panel();
         btnPanel.setLayout(new GridLayout(5,1));
         btnPanel.add(analyseBtn);
         btnPanel.add(highlightWords);
+        btnPanel.add(wordSeperatingDistance);
         btnPanel.add(clearBtn);
         add(btnPanel, BorderLayout.EAST);
     }

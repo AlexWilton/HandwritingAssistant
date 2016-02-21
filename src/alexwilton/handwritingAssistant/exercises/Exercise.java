@@ -65,4 +65,12 @@ public abstract class Exercise {
     public void setHighlightedWords(Set<Word> highlightedWords) {
         this.highlightedWords = highlightedWords;
     }
+
+    public String getInstruction() {
+        return instruction;
+    }
+
+    public String getTextToCopy() {
+        return textToCopy;
+    }
 }
