@@ -33,9 +33,9 @@ public class StrokeAnalyser {
         int targetCount = targetWords.length;
         HashSet<Word> wordsToHighLight = new HashSet<>();
         for(int i=0; i<recognisedWords.size() && i<targetCount; i++){
-            Word writtenWord = recognisedWords.get(i);
+            String writtenWord = recognisedWords.get(i).getText().replaceAll("[^a-zA-Z]", "").toLowerCase();
             String targetWord = targetWords[i].replaceAll("[^a-zA-Z]", "").toLowerCase(); //remove not letters from comparison.
-            if(!targetWord.equals(writtenWord.getText())) wordsToHighLight.add(writtenWord);
+            if(!targetWord.equals(writtenWord)) wordsToHighLight.add(recognisedWords.get(i));
         }
         exercise.setHighlightedWords(wordsToHighLight);
         canvas.repaint();
