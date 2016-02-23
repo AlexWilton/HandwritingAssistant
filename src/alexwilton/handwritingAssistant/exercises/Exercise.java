@@ -38,6 +38,7 @@ public abstract class Exercise {
             g.setColor(new Color(231, 76, 60, 60));
             g.setStroke(new BasicStroke());
             g.fillRect(word.getX(), word.getY(), word.getWidth(), word.getHeight());
+            System.out.println("Highlighting: " + word.getText());
         }
     }
 
