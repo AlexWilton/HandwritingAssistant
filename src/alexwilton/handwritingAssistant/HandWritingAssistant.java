@@ -82,11 +82,11 @@ public class HandWritingAssistant extends JFrame{
             public void textValueChanged(TextEvent e) {
                 try {
                     int newVal = Integer.parseInt(wordSeperatingDistance.getText());
-                    strokeAnalyser.setWordSeperatingDistance(newVal);
+                    strokeAnalyser.setWordSeparatingDistance(newVal);
                 }catch (NumberFormatException nfe){}
             }
         });
-        wordSeperatingDistance.setText(strokeAnalyser.getWordSeperatingDistance() + "");
+        wordSeperatingDistance.setText(strokeAnalyser.getWordSeparatingDistance() + "");
         Panel btnPanel = new Panel();
         btnPanel.setLayout(new GridLayout(5,1));
         btnPanel.add(analyseBtn);

@@ -194,12 +194,15 @@ public class MyScriptConnection {
      * @param messageHandler Method to deal with response.
      */
     public void recognizeStrokes(Stroke[] strokeArray, final MessageHandler messageHandler) {
-        addMessageHandler(new MessageHandler(){
-            @Override
-            public void handleMessage(String message) {
-                messageHandler.handleMessage(message);
+        //wait for recog connection to be free
+        while(status == ConnectionStatus.STARTED){
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        });
+        }
+        addMessageHandler(messageHandler);
         sendStartRecogRequest(strokeArray);
     }
 
