@@ -49,8 +49,7 @@ public class StrokeAnalyser {
                 myScriptConnection.recognizeStrokes(sArray, new MyScriptConnection.MessageHandler() {
                     private Stroke[] strokesToAnalyse;
                     @Override
-                    public void handleMessage(String json) {
-                        String text = myScriptConnection.getTextOutputResult(json);
+                    public void handleMessage(String text) {
                         System.out.println("Text: " + text);
                         recognisedWords.add(extractWordFromStrokes(strokesToAnalyse, text));
                         highlightExerciseMistakes();
@@ -63,6 +62,7 @@ public class StrokeAnalyser {
                 }.init(sArray));
 
             } catch (Exception e) {
+                e.printStackTrace();
                 System.err.println("Couldn't recognise strokes. Exception: " + e.getClass().getSimpleName() + " Message: " + e.getMessage());
             }
         }

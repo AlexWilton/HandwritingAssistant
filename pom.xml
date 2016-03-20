@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.myscript.cloud</groupId>
-	<artifactId>MyScriptCloudSample</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>myscript-cloud-java-sample</name>
-	<description>Client sample for MyScript Cloud web services in java  </description>
+	<groupId>alexwilton.handwritingAssistant</groupId>
+	<artifactId>DEALAssistant</artifactId>
+	<version>1.0</version>
+	<name>DEALAssistant</name>
+	<description>DEALAssistant - Alex Wilton's SHP</description>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
@@ -27,52 +27,16 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.4</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<mainClass>com.myscript.cloud.demo.MyScriptCloudSample</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.4</version>
 				<configuration>
 					<archive>
 						<manifest>
-							<addClasspath>true</addClasspath>
-							<mainClass>alexwilton.handwritingAssistant.HandWritingAssistant</mainClass>
+							<mainClass>alexwilton.handwritingAssistant.DEALAssistant</mainClass>
 						</manifest>
-
 					</archive>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<executable>java</executable>
-					<arguments>
-						<argument>-jar</argument>
-						<argument>${basedir}/target/MyScriptCloudSample-${project.version}-jar-with-dependencies.jar</argument>
-					</arguments>
-				</configuration>
-			</plugin>
+
 		</plugins>
 	</build>
 	<dependencies>

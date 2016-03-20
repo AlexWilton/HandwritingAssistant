@@ -19,19 +19,14 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @ClientEndpoint
 public class MyScriptConnection {
     private MessageHandler messageHandler;
-    Session userSession = null;
+    private Session userSession = null;
     private ObjectMapper mapper = new ObjectMapper();
     private String applicationKey, hmacKey, myScriptURL;
     private String currentInstanceId = null;
-    private Lock communicationInProcessLock = new ReentrantLock();
 
     enum ConnectionStatus { DISCONNECTED, READY_TO_START, STARTED}
     private ConnectionStatus status = ConnectionStatus.DISCONNECTED;
@@ -42,7 +37,6 @@ public class MyScriptConnection {
         this.myScriptURL = myScriptURL;
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//        connect();
     }
     private void connect(){
         try {
@@ -53,6 +47,7 @@ public class MyScriptConnection {
             init1.put("applicationKey", applicationKey);
             sendMessage(init1.toJSONString());
         } catch (Exception e) {
+            System.err.println("System failed to connected to MyScript");
             throw new RuntimeException(e);
         }
     }
@@ -62,11 +57,9 @@ public class MyScriptConnection {
     public void onClose(Session userSession, CloseReason reason) {
         this.userSession = null;
         status = ConnectionStatus.DISCONNECTED;
-        System.out.println("Connection to MyScript closed!");
     }
     @OnMessage
     public void onMessage(String jsonMsg) {
-//        System.out.println("Message received: " + jsonMsg);
         JSONObject msg = (JSONObject) JSONValue.parse(jsonMsg);
         switch ((String) msg.get("type")){
             case "hmacChallenge": //compute response and send it
@@ -86,16 +79,17 @@ public class MyScriptConnection {
             case "textResult":
                 TextOutput textOutput = getTextOutputs(jsonMsg);
                 currentInstanceId = textOutput.getInstanceId();
-                if(messageHandler != null)
-                    messageHandler.handleMessage(jsonMsg);
-                else
+                if(messageHandler != null) {
+                    String textRecognised = getTextOutputResult(jsonMsg);
+                    messageHandler.handleMessage(textRecognised);
+                }else
                     System.out.println("Result received: " + getTextOutputResult(jsonMsg));
                 sendResetRequest();
                 break;
         }
     }
 
-    public void sendResetRequest() {
+    private void sendResetRequest() {
         JSONObject reset = new JSONObject();
         reset.put("type", "reset");
         sendMessage(reset.toJSONString());
@@ -142,14 +136,13 @@ public class MyScriptConnection {
         }
     }
 
-    public String getTextOutputResult(String json) {
+    protected String getTextOutputResult(String json) {
         TextOutput output = getTextOutputs(json);
         final int selectedCandidateIdx = output.getResult().getTextSegmentResult().getSelectedCandidateIdx();
         return output.getResult().getTextSegmentResult().getCandidates().get(selectedCandidateIdx).getLabel();
     }
 
-    public TextOutput getTextOutputs(String json) {
-
+    private TextOutput getTextOutputs(String json) {
         Reader jsonReader = new StringReader(json);
         TextOutput output = null;
         try {
@@ -179,22 +172,18 @@ public class MyScriptConnection {
     }
 
 
-
-    public void addMessageHandler(MessageHandler msgHandler) {
-        this.messageHandler = msgHandler;
-    }
-    public void sendMessage(String message) {
-//        System.out.println(message);
+    private void sendMessage(String message) {
         this.userSession.getAsyncRemote().sendText(message);
     }
 
     /**
-     * Recognise one array of stroke at a time. (Use lock for concurrency control)
+     * Recognise strokes and set message handler for handing recognition result.
+     * Method waits until connection is free before setting handler and sending request (synchronous).
      * @param strokeArray Strokes to analyse
      * @param messageHandler Method to deal with response.
      */
     public void recognizeStrokes(Stroke[] strokeArray, final MessageHandler messageHandler) {
-        //wait for recog connection to be free
+        //wait for connection to be free
         while(status == ConnectionStatus.STARTED){
             try {
                 Thread.sleep(10);
@@ -202,13 +191,16 @@ public class MyScriptConnection {
                 e.printStackTrace();
             }
         }
-        addMessageHandler(messageHandler);
+
+        //set message handler then send message
+        this.messageHandler = messageHandler;
         sendStartRecogRequest(strokeArray);
     }
 
     /**
      * Compute required value to return to the server with hmac SHA512 hash algorithm
-     * It prevents from man-in-the-middle key theft
+     * It prevents from man-in-the-middle key theft.
+     * This method is provided by MyScript
      *
      * @applicationKey : applicationKey
      * @hmackey :hmackey

@@ -11,7 +11,7 @@ import javax.swing.JFrame;
 import alexwilton.handwritingAssistant.exercises.Exercise;
 import alexwilton.handwritingAssistant.exercises.Exercise1;
 
-public class HandWritingAssistant extends JFrame{
+public class DEALAssistant extends JFrame{
 
 	private static final String APPLICATION_KEY = "22eda92c-10af-40d8-abea-fd4093c17d81"; //"c34e7a84-a0da-41cb-84f8-b2cf8459c3df"; //
 	private static final String RECOGNITION_CLOUD_URL = "ws://cloud.myscript.com/api/v3.0/recognition/ws/text";// "http://cloud.myscript.com/api/v3.0/recognition/rest/text/doSimpleRecognition.json";
@@ -23,7 +23,7 @@ public class HandWritingAssistant extends JFrame{
     private StrokeAnalyser strokeAnalyser;
     private MyScriptConnection myScriptConnection;
 
-	public HandWritingAssistant() {
+	public DEALAssistant() {
 		super("Hand Writing Assistant");
         currentExercise = new Exercise1();
 		setup();
@@ -31,13 +31,11 @@ public class HandWritingAssistant extends JFrame{
 
 	private void setup(){
 		Dimension screenSize = getScreenDimension();
-
 		setSize(screenSize.width, screenSize.height);
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 
-//		MyScriptCloud myScriptCloud = new MyScriptCloud(RECOGNITION_CLOUD_URL, APPLICATION_KEY, HMAC_KEY);
         myScriptConnection = new MyScriptConnection(APPLICATION_KEY, HMAC_KEY, RECOGNITION_CLOUD_URL);
         strokeAnalyser = new StrokeAnalyser(currentExercise, myScriptConnection);
         canvas = new Canvas(strokeAnalyser);
@@ -102,6 +100,6 @@ public class HandWritingAssistant extends JFrame{
 	}
 
 	public static void main(String[] args) {
-        new HandWritingAssistant().setVisible(true);
+        new DEALAssistant().setVisible(true);
 	}
 }

@@ -1,6 +1,6 @@
 package alexwilton.handwritingAssistant.exercises;
 
-import alexwilton.handwritingAssistant.HandWritingAssistant;
+import alexwilton.handwritingAssistant.DEALAssistant;
 import alexwilton.handwritingAssistant.Word;
 
 import java.awt.*;
@@ -43,7 +43,7 @@ public abstract class Exercise {
 
     private void drawLines(Graphics2D g) {
         g.setColor(Color.GRAY);
-        int startX = 10, endX = HandWritingAssistant.getScreenDimension().width - startX;
+        int startX = 10, endX = DEALAssistant.getScreenDimension().width - startX;
         int lineSpacing = 120; int numOfLines = 6;
         int startingYOffset = 250;
         for(int lineNum=0; lineNum<numOfLines; lineNum++){
@@ -54,7 +54,7 @@ public abstract class Exercise {
 
 
     private static int calculateXforCentringString(Graphics2D g, String strToCentre){
-        return HandWritingAssistant.getScreenDimension().width/2 - g.getFontMetrics().stringWidth(strToCentre)/2;
+        return DEALAssistant.getScreenDimension().width/2 - g.getFontMetrics().stringWidth(strToCentre)/2;
     }
 
 
