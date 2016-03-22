@@ -18,7 +18,11 @@ public abstract class Exercise {
     }
 
 
-    public abstract void draw(Graphics2D g);
+    public void draw(Graphics2D g){
+        g.setFont(new Font("Droid Sans", Font.PLAIN, 25));
+        String exText = getClass().getSimpleName().replaceAll("(?<=\\D)(?=\\d)", " ");
+        g.drawString(exText, calculateXforCentringString(g, exText), 50);
+    }
 
     protected void highlightWords(Graphics2D g) {
         if(highlightedWords == null) return;

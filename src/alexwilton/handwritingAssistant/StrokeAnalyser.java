@@ -1,8 +1,6 @@
 package alexwilton.handwritingAssistant;
 
-
-import alexwilton.handwritingAssistant.exercises.Exercise;
-
+import alexwilton.handwritingAssistant.exercises.ExerciseManager;
 import com.myscript.cloud.sample.ws.api.*;
 import com.myscript.cloud.sample.ws.api.Stroke;
 
@@ -10,15 +8,15 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class StrokeAnalyser {
-    private Exercise exercise;
+    private ExerciseManager exerciseManager;
     private MyScriptConnection myScriptConnection;
     private ConcurrentLinkedQueue<Stroke> incomingStrokes = new ConcurrentLinkedQueue<>();
     private Canvas canvas;
     private int wordSeparatingDistance = 35;
     private List<Word> recognisedWords;
 
-    public StrokeAnalyser(Exercise exercise, MyScriptConnection myScriptConnection) {
-        this.exercise = exercise;
+    public StrokeAnalyser(ExerciseManager exerciseManager, MyScriptConnection myScriptConnection) {
+        this.exerciseManager = exerciseManager;
         this.myScriptConnection = myScriptConnection;
     }
 
@@ -38,7 +36,7 @@ public class StrokeAnalyser {
                     public void handleMessage(String text) {
                         System.out.println("Text: " + text);
                         recognisedWords.add(extractWordFromStrokes(strokesToAnalyse, text));
-                        exercise.generateFeedback(recognisedWords);
+                        exerciseManager.getCurrentExercise().generateFeedback(recognisedWords);
                         canvas.repaint();
                     }
 
@@ -85,16 +83,16 @@ public class StrokeAnalyser {
         return strokeGroups;
     }
 
-    public void highlightWords(){
-        ArrayList<ArrayList<Stroke>> strokeGroups = divideStrokesIntoWords();
-        HashSet<Word> words = new HashSet<>();
-        for(ArrayList<Stroke> strokeSet : strokeGroups){
-            Stroke[] sArray = strokeSet.toArray(new Stroke[strokeSet.size()]);
-            words.add(extractWordFromStrokes(sArray, ""));
-        }
-        exercise.setHighlightedWords(words);
-        canvas.repaint();
-    }
+//    public void highlightWords(){
+//        ArrayList<ArrayList<Stroke>> strokeGroups = divideStrokesIntoWords();
+//        HashSet<Word> words = new HashSet<>();
+//        for(ArrayList<Stroke> strokeSet : strokeGroups){
+//            Stroke[] sArray = strokeSet.toArray(new Stroke[strokeSet.size()]);
+//            words.add(extractWordFromStrokes(sArray, ""));
+//        }
+//        exerciseManager.getCurrentExercise().setHighlightedWords(words);
+//        canvas.repaint();
+//    }
 
     private double minDistanceBetweenStrokes(Stroke s1, Stroke s2){
         double minDistance  = Double.MAX_VALUE;

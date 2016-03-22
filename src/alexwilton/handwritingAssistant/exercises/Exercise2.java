@@ -12,6 +12,7 @@ public class Exercise2 extends Exercise {
     }
 
     public void draw(Graphics2D g) {
+        super.draw(g);
         g.setColor(Color.BLUE);
 
         g.setFont(new Font("Droid Sans", Font.PLAIN, 25));

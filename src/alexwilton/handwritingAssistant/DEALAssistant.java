@@ -6,10 +6,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.TextEvent;
 import java.awt.event.TextListener;
 
-import javax.swing.JFrame;
+import javax.swing.*;
 
 import alexwilton.handwritingAssistant.exercises.Exercise;
 import alexwilton.handwritingAssistant.exercises.Exercise1;
+import alexwilton.handwritingAssistant.exercises.ExerciseManager;
 
 public class DEALAssistant extends JFrame{
 
@@ -19,13 +20,13 @@ public class DEALAssistant extends JFrame{
 
 	private Canvas canvas;
 
-    private Exercise currentExercise;
+    private ExerciseManager exerciseManager;
     private StrokeAnalyser strokeAnalyser;
     private MyScriptConnection myScriptConnection;
 
 	public DEALAssistant() {
 		super("Hand Writing Assistant");
-        currentExercise = new Exercise1();
+        exerciseManager = ExerciseManager.createDefault();
 		setup();
 	}
 
@@ -35,19 +36,19 @@ public class DEALAssistant extends JFrame{
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
-
         myScriptConnection = new MyScriptConnection(APPLICATION_KEY, HMAC_KEY, RECOGNITION_CLOUD_URL);
-        strokeAnalyser = new StrokeAnalyser(currentExercise, myScriptConnection);
+        strokeAnalyser = new StrokeAnalyser(exerciseManager, myScriptConnection);
         canvas = new Canvas(strokeAnalyser);
         strokeAnalyser.setCanvas(canvas);
-        canvas.setExercise(currentExercise);
+        canvas.setExerciseManager(exerciseManager);
 
 		add(canvas, BorderLayout.CENTER);
         addButtons();
 	}
 
     private void addButtons() {
-        Button analyseBtn = new Button("Analyse");
+        Font btnFont = new Font("Arial", Font.PLAIN, 40);
+        JButton analyseBtn = new JButton("Check For Mistakes"); analyseBtn.setFont(btnFont);
         analyseBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -55,26 +56,24 @@ public class DEALAssistant extends JFrame{
                 strokeAnalyser.analyseStrokes();
             }
         });
-        Button highlightWords = new Button("highlightWords");
-        highlightWords.addMouseListener(new MouseAdapter() {
+        JButton nextExBtn = new JButton("Next Exercise"); nextExBtn.setFont(btnFont);
+        nextExBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                strokeAnalyser.highlightWords();
+                exerciseManager.moveToNextExercise();
+                resetExercise();
             }
         });
-        Button clearBtn = new Button("Clear");
+        JButton clearBtn = new JButton("Reset Exercise"); clearBtn.setFont(btnFont);
         clearBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                currentExercise.setHighlightedWords(null);
-                canvas.clearStrokes();
-                strokeAnalyser.clearStroke();
-                canvas.repaint();
+                resetExercise();
             }
         });
-        final TextField wordSeperatingDistance = new TextField();
+        final TextField wordSeperatingDistance = new TextField(); wordSeperatingDistance.setFont(btnFont);
         wordSeperatingDistance.addTextListener(new TextListener() {
             @Override
             public void textValueChanged(TextEvent e) {
@@ -85,13 +84,27 @@ public class DEALAssistant extends JFrame{
             }
         });
         wordSeperatingDistance.setText(strokeAnalyser.getWordSeparatingDistance() + "");
-        Panel btnPanel = new Panel();
-        btnPanel.setLayout(new GridLayout(5,1));
+        JPanel btnPanel = new JPanel();
+        btnPanel.setLayout(new GridLayout(1,5));
         btnPanel.add(analyseBtn);
-        btnPanel.add(highlightWords);
+        btnPanel.add(nextExBtn);
         btnPanel.add(wordSeperatingDistance);
         btnPanel.add(clearBtn);
-        add(btnPanel, BorderLayout.EAST);
+
+        JPanel mainVerticalPanel = new JPanel();
+        mainVerticalPanel.setLayout(new BoxLayout(mainVerticalPanel, BoxLayout.Y_AXIS));
+        mainVerticalPanel.add(btnPanel);
+        JPanel whiteBottomPadding = new JPanel();
+        whiteBottomPadding.setBackground(Color.WHITE); whiteBottomPadding.setBorder(BorderFactory.createEmptyBorder(0,0,100,0));
+        mainVerticalPanel.add(whiteBottomPadding);
+        add(mainVerticalPanel, BorderLayout.SOUTH);
+    }
+
+    private void resetExercise(){
+        exerciseManager.getCurrentExercise().setHighlightedWords(null);
+        canvas.clearStrokes();
+        strokeAnalyser.clearStroke();
+        canvas.repaint();
     }
 
     public static Dimension getScreenDimension(){

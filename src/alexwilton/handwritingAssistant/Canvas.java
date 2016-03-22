@@ -1,6 +1,7 @@
 package alexwilton.handwritingAssistant;
 
 import alexwilton.handwritingAssistant.exercises.Exercise;
+import alexwilton.handwritingAssistant.exercises.ExerciseManager;
 import com.myscript.cloud.sample.ws.api.Box;
 import com.myscript.cloud.sample.ws.api.Point;
 import com.myscript.cloud.sample.ws.api.Stroke;
@@ -26,7 +27,7 @@ public class Canvas extends JComponent implements MouseListener, MouseMotionList
     private List<Point> pendingPoints = new ArrayList<Point>();
     private Graphics2D g;
     private StrokeAnalyser strokeAnalyser;
-    private Exercise exercise = null;
+    private ExerciseManager exerciseManager = null;
 
 public Canvas(StrokeAnalyser strokeAnalyser) {
         addMouseListener(this);
@@ -50,7 +51,7 @@ public Canvas(StrokeAnalyser strokeAnalyser) {
         g.setColor(STROKE_COLOR);
         g.setStroke(STROKE_STYLE);
 
-        if(exercise != null) exercise.draw(g);
+        if(exerciseManager != null) exerciseManager.getCurrentExercise().draw(g);
 
         if (!strokes.isEmpty()) {
             Iterator<Stroke> iterator = strokes.iterator();
@@ -154,12 +155,7 @@ public Canvas(StrokeAnalyser strokeAnalyser) {
     public void mouseClicked(MouseEvent arg0) {
     }
 
-    public Exercise getExercise() {
-        return exercise;
+    public void setExerciseManager(ExerciseManager exerciseManager) {
+        this.exerciseManager = exerciseManager;
     }
-
-    public void setExercise(Exercise exercise) {
-        this.exercise = exercise;
-    }
-
 }
