@@ -50,14 +50,13 @@ public Canvas(StrokeAnalyser strokeAnalyser) {
         g.setColor(STROKE_COLOR);
         g.setStroke(STROKE_STYLE);
 
+        if(exercise != null) exercise.draw(g);
+
         if (!strokes.isEmpty()) {
             Iterator<Stroke> iterator = strokes.iterator();
-
             while (iterator.hasNext()) {
                 Stroke stroke = iterator.next();
-
                 List<Point> pointsAsList = Arrays.asList(stroke.getPoints());
-
                 drawPoints(g, pointsAsList);
             }
         }
@@ -66,8 +65,6 @@ public Canvas(StrokeAnalyser strokeAnalyser) {
             g.setStroke(DRAWING_STROKE_STYLE);
             drawPoints(g, pendingPoints);
         }
-
-        if(exercise != null) exercise.draw(g);
 
     }
 

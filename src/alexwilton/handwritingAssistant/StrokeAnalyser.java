@@ -14,8 +14,8 @@ public class StrokeAnalyser {
     private MyScriptConnection myScriptConnection;
     private ConcurrentLinkedQueue<Stroke> incomingStrokes = new ConcurrentLinkedQueue<>();
     private Canvas canvas;
-    private int wordSeparatingDistance = 30;
-    private List<Word> recognisedWords = new ArrayList<>();
+    private int wordSeparatingDistance = 35;
+    private List<Word> recognisedWords;
 
     public StrokeAnalyser(Exercise exercise, MyScriptConnection myScriptConnection) {
         this.exercise = exercise;
@@ -26,22 +26,8 @@ public class StrokeAnalyser {
         incomingStrokes.add(stroke);
     }
 
-
-    private void highlightExerciseMistakes(){
-        String target = exercise.getTextToCopy();
-        String[] targetWords = target.split(" ");
-        int targetCount = targetWords.length;
-        HashSet<Word> wordsToHighLight = new HashSet<>();
-        for(int i=0; i<recognisedWords.size() && i<targetCount; i++){
-            String writtenWord = recognisedWords.get(i).getText().replaceAll("[^a-zA-Z]", "").toLowerCase();
-            String targetWord = targetWords[i].replaceAll("[^a-zA-Z]", "").toLowerCase(); //remove not letters from comparison.
-            if(!targetWord.equals(writtenWord)) wordsToHighLight.add(recognisedWords.get(i));
-        }
-        exercise.setHighlightedWords(wordsToHighLight);
-        canvas.repaint();
-    }
-
     public void analyseStrokes(){
+        recognisedWords = new ArrayList<>();
         ArrayList<ArrayList<Stroke>> strokeSetList = divideStrokesIntoWords();
         for(ArrayList<Stroke> wordStrokes : strokeSetList){
             Stroke[] sArray = wordStrokes.toArray(new Stroke[wordStrokes.size()]);
@@ -52,7 +38,8 @@ public class StrokeAnalyser {
                     public void handleMessage(String text) {
                         System.out.println("Text: " + text);
                         recognisedWords.add(extractWordFromStrokes(strokesToAnalyse, text));
-                        highlightExerciseMistakes();
+                        exercise.generateFeedback(recognisedWords);
+                        canvas.repaint();
                     }
 
                     private MyScriptConnection.MessageHandler init(Stroke[] strokeToAnalyse){
