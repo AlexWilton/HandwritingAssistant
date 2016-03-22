@@ -1,6 +1,7 @@
 package alexwilton.handwritingAssistant.exercises;
 
 import alexwilton.handwritingAssistant.DEALAssistant;
+import alexwilton.handwritingAssistant.StrokeAnalyser;
 import alexwilton.handwritingAssistant.Word;
 
 import java.awt.*;
@@ -8,14 +9,18 @@ import java.util.*;
 import java.util.List;
 
 public abstract class Exercise {
-    private String instruction;
-    private String textToCopy;
+    protected String instruction;
+    protected String textToCopy;
     private Set<Word> highlightedWords;
+
+    protected boolean caseSensitiveChecking = true;
 
     public Exercise(String instruction, String textToCopy) {
         this.instruction = instruction;
         this.textToCopy = textToCopy;
     }
+
+    public Exercise() {}
 
 
     public void draw(Graphics2D g){
@@ -31,6 +36,11 @@ public abstract class Exercise {
             g.setColor(new Color(231, 76, 60, 60));
             g.setStroke(new BasicStroke());
             g.fillRect(word.getX(), word.getY(), word.getWidth(), word.getHeight());
+            g.setFont(new Font("Arial", Font.PLAIN, 25));
+            g.setColor(Color.BLUE);
+            g.drawString(word.getExpected(), word.getX(), word.getY()+word.getHeight()+20);
+            g.setColor(Color.BLACK);
+            g.drawString(word.getText(), word.getX(), word.getY()+word.getHeight()+40);
         }
     }
 
@@ -71,15 +81,28 @@ public abstract class Exercise {
      * Use ordered list of recognised words to generate visual feedback
      * @param recognisedWords
      */
-    public void generateFeedback(List<Word> recognisedWords) {
+    public void generateFeedback(List<Word> recognisedWords, StrokeAnalyser strokeAnalyser) {
         /*Highlight all non-expected words*/
         String[] targetWords = textToCopy.split(" ");
         int targetCount = targetWords.length;
         HashSet<Word> wordsToHighLight = new HashSet<>();
         for(int i=0; i<recognisedWords.size() && i<targetCount; i++){
-            String writtenWord = recognisedWords.get(i).getText().replaceAll("[^a-zA-Z]", "").toLowerCase();
-            String targetWord = targetWords[i].replaceAll("[^a-zA-Z]", "").toLowerCase(); //remove not letters from comparison.
-            if(!targetWord.equals(writtenWord)) wordsToHighLight.add(recognisedWords.get(i));
+            String writtenWord = recognisedWords.get(i).getText().replaceAll("[^a-zA-Z]", "");
+            String targetWord = targetWords[i].replaceAll("[^a-zA-Z]", ""); //remove not letters from comparison.
+            if(!caseSensitiveChecking){writtenWord = writtenWord.toLowerCase(); targetWord = targetWord.toLowerCase();}
+            if(!targetWord.equals(writtenWord)){
+                recognisedWords.get(i).setExpected(targetWord);
+                wordsToHighLight.add(recognisedWords.get(i));
+            }
+
+            //check for two words grouped as one
+            if(writtenWord.contains(" ")) {
+                strokeAnalyser.setWordSeparatingDistance(strokeAnalyser.getWordSeparatingDistance() - 5);
+                strokeAnalyser.analyseStrokes();
+                highlightedWords = new HashSet<>();
+                return;
+            }
+
         }
         highlightedWords = wordsToHighLight;
     }

@@ -11,6 +11,7 @@ import javax.swing.*;
 import alexwilton.handwritingAssistant.exercises.Exercise;
 import alexwilton.handwritingAssistant.exercises.Exercise1;
 import alexwilton.handwritingAssistant.exercises.ExerciseManager;
+import dhuckaby.NonsenseGenerator;
 
 public class DEALAssistant extends JFrame{
 
@@ -41,6 +42,7 @@ public class DEALAssistant extends JFrame{
         canvas = new Canvas(strokeAnalyser);
         strokeAnalyser.setCanvas(canvas);
         canvas.setExerciseManager(exerciseManager);
+        canvas.setShowStrokes(true);
 
 		add(canvas, BorderLayout.CENTER);
         addButtons();

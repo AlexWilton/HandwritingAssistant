@@ -4,6 +4,7 @@ public class Word {
     private int x,y,width,height;
     private String text;
     private static final int CONTAINS_FUDGE_FACTOR = 5;
+    private String expected;
 
     public Word(int x, int y, int width, int height, String text) {
         this.x = x;
@@ -50,5 +51,13 @@ public class Word {
         if(!(x < ptX+CONTAINS_FUDGE_FACTOR && ptX-CONTAINS_FUDGE_FACTOR < x + width )) return false;
         if(!(y < ptY+CONTAINS_FUDGE_FACTOR &&  ptY-CONTAINS_FUDGE_FACTOR < y + height )) return false;
         return true;
+    }
+
+    public void setExpected(String expected) {
+        this.expected = expected;
+    }
+
+    public String getExpected() {
+        return expected;
     }
 }

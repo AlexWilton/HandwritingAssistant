@@ -36,7 +36,7 @@ public class StrokeAnalyser {
                     public void handleMessage(String text) {
                         System.out.println("Text: " + text);
                         recognisedWords.add(extractWordFromStrokes(strokesToAnalyse, text));
-                        exerciseManager.getCurrentExercise().generateFeedback(recognisedWords);
+                        exerciseManager.getCurrentExercise().generateFeedback(recognisedWords, StrokeAnalyser.this);
                         canvas.repaint();
                     }
 

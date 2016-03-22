@@ -17,6 +17,11 @@ public class ExerciseManager {
         List<Exercise> exercises = new ArrayList<>();
         exercises.add(new Exercise1());
         exercises.add(new Exercise2());
+        exercises.add(new Exercise2());
+        exercises.add(new Exercise2());
+        exercises.add(new Exercise2());
+        exercises.add(new Exercise2());
+
         exerciseManager.exercises = exercises;
         exerciseManager.currentExerciseIndex = 0;
         return exerciseManager;
@@ -34,5 +39,9 @@ public class ExerciseManager {
 
     public Exercise getCurrentExercise(){
         return exercises.get(currentExerciseIndex);
+    }
+
+    public int getCurrentExerciseNumber(){
+        return currentExerciseIndex + 1;
     }
 }

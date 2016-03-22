@@ -22,12 +22,14 @@ public class Canvas extends JComponent implements MouseListener, MouseMotionList
     private static final java.awt.Stroke STROKE_STYLE = new BasicStroke(3,BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
     private static final java.awt.Stroke DRAWING_STROKE_STYLE = new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 
+    private boolean showStrokes = false;
     private List<Stroke> strokes = new ArrayList<Stroke>();
     private boolean drawing;
     private List<Point> pendingPoints = new ArrayList<Point>();
     private Graphics2D g;
     private StrokeAnalyser strokeAnalyser;
     private ExerciseManager exerciseManager = null;
+
 
 public Canvas(StrokeAnalyser strokeAnalyser) {
         addMouseListener(this);
@@ -53,7 +55,7 @@ public Canvas(StrokeAnalyser strokeAnalyser) {
 
         if(exerciseManager != null) exerciseManager.getCurrentExercise().draw(g);
 
-        if (!strokes.isEmpty()) {
+        if (!strokes.isEmpty() && showStrokes) {
             Iterator<Stroke> iterator = strokes.iterator();
             while (iterator.hasNext()) {
                 Stroke stroke = iterator.next();
@@ -62,7 +64,7 @@ public Canvas(StrokeAnalyser strokeAnalyser) {
             }
         }
 
-        if (!pendingPoints.isEmpty()) {
+        if (!pendingPoints.isEmpty() && showStrokes) {
             g.setStroke(DRAWING_STROKE_STYLE);
             drawPoints(g, pendingPoints);
         }
@@ -157,5 +159,13 @@ public Canvas(StrokeAnalyser strokeAnalyser) {
 
     public void setExerciseManager(ExerciseManager exerciseManager) {
         this.exerciseManager = exerciseManager;
+    }
+
+    public boolean isShowStrokes() {
+        return showStrokes;
+    }
+
+    public void setShowStrokes(boolean showStrokes) {
+        this.showStrokes = showStrokes;
     }
 }
