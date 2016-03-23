@@ -35,7 +35,6 @@ public class StrokeAnalyser {
                     public void handleMessage(String text) {
                         System.out.println("Text: " + text);
                         recognisedWords.add(extractWordFromStrokes(strokesToAnalyse, text));
-                        exerciseManager.getCurrentExercise().generateFeedback(recognisedWords, StrokeAnalyser.this, recordFailedWordAttempts);
                         canvas.repaint();
                     }
 
@@ -50,6 +49,8 @@ public class StrokeAnalyser {
                 System.err.println("Couldn't recognise strokes. Exception: " + e.getClass().getSimpleName() + " Message: " + e.getMessage());
             }
         }
+        myScriptConnection.waitUntilFinished();
+        exerciseManager.getCurrentExercise().generateFeedback(recognisedWords, StrokeAnalyser.this, recordFailedWordAttempts);
     }
 
     private ArrayList<ArrayList<Stroke>> divideStrokesIntoWords(){

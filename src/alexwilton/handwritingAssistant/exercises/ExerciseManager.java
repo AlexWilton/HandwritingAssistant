@@ -25,7 +25,7 @@ public class ExerciseManager {
 //        exercises.add(new AlphabetExercise());
 //        exercises.add(new HeadlineSentenceExercise());
 //        exercises.add(new HeadlineSentenceExercise());
-//        exercises.add(new HeadlineSentenceExercise());
+        exercises.add(new HeadlineSentenceExercise());
         exercises.add(new RecapExercise());
         exerciseManager.currentExerciseIndex = 0;
         exerciseManager.exercises = exercises;
@@ -33,6 +33,10 @@ public class ExerciseManager {
         exerciseManager.wordFormingFailCount.put("test", 2);
         exerciseManager.wordFormingFailCount.put("man", 1);
         exerciseManager.wordFormingFailCount.put("manager", 4);
+        exerciseManager.wordFormingFailCount.put("lone", 2);
+        exerciseManager.wordFormingFailCount.put("gone", 1);
+        exerciseManager.wordFormingFailCount.put("unordered", 4);
+        exerciseManager.wordFormingFailCount.put("sorted", 4);
         //track word fail count across all exercises together
         for(Exercise ex : exercises){ ex.setWordFormingFailCount(exerciseManager.wordFormingFailCount);}
         return exerciseManager;
@@ -43,6 +47,18 @@ public class ExerciseManager {
     public void moveToNextExercise(){
         currentExerciseIndex++;
         if(currentExerciseIndex >= exercises.size()) currentExerciseIndex = currentExerciseIndex % exercises.size();
+        if(currentExerciseIndex == 0){
+            wordFormingFailCount = new HashMap<>();
+            for(Exercise ex : exercises){
+                if(ex instanceof RecapExercise){
+                    exercises.remove(ex);
+                    RecapExercise newRecap = new RecapExercise();
+                    newRecap.setWordFormingFailCount(wordFormingFailCount);
+                    exercises.add(newRecap);
+                    break;
+                }
+            }
+        }
     }
 
     public Exercise getNextExecise(){

@@ -8,7 +8,9 @@ import java.awt.event.TextListener;
 
 import javax.swing.*;
 
+import alexwilton.handwritingAssistant.exercises.Exercise;
 import alexwilton.handwritingAssistant.exercises.ExerciseManager;
+import alexwilton.handwritingAssistant.exercises.RecapExercise;
 
 public class DEALAssistant extends JFrame{
 
@@ -60,11 +62,8 @@ public class DEALAssistant extends JFrame{
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                strokeAnalyser.analyseStrokes(true);
-                myScriptConnection.waitUntilFinished();
-                exerciseManager.moveToNextExercise();
-                nextExBtn.setText((exerciseManager.isLastExercise()) ? "Restart Exercises" : "Next Exercise");
-                resetExercise();
+                nextClick(nextExBtn);
+
             }
         });
         JButton clearBtn = new JButton("Reset Exercise"); clearBtn.setFont(btnFont);
@@ -100,6 +99,28 @@ public class DEALAssistant extends JFrame{
         whiteBottomPadding.setBackground(Color.WHITE); whiteBottomPadding.setBorder(BorderFactory.createEmptyBorder(0,0,100,0));
         mainVerticalPanel.add(whiteBottomPadding);
         add(mainVerticalPanel, BorderLayout.SOUTH);
+    }
+
+    private void nextClick(JButton nextExBtn){
+        //check for next page on recap
+        Exercise currentExercise = exerciseManager.getCurrentExercise();
+        if(currentExercise instanceof RecapExercise){
+            RecapExercise ex = (RecapExercise) currentExercise;
+            if(ex.hasAnotherPage()) {
+                ex.moveToNextPage();
+                if(!ex.hasAnotherPage()) {
+                    nextExBtn.setText("Restart");
+                }
+                resetExercise(); return;
+            }
+        }
+
+        strokeAnalyser.analyseStrokes(true);
+        myScriptConnection.waitUntilFinished();
+        exerciseManager.moveToNextExercise();
+        currentExercise = exerciseManager.getCurrentExercise();
+        if(currentExercise instanceof RecapExercise && ((RecapExercise) currentExercise).hasAnotherPage()) nextExBtn.setText("Next");
+        resetExercise();
     }
 
     private void resetExercise(){

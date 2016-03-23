@@ -49,7 +49,7 @@ public abstract class Exercise {
     protected void drawLines(Graphics2D g) {
         g.setColor(Color.GRAY);
         int startX = 10, endX = DEALAssistant.getScreenDimension().width - startX;
-        int lineSpacing = 120; int numOfLines = 6;
+        int lineSpacing = 120; int numOfLines = 5;
         int startingYOffset = 250;
         for(int lineNum=0; lineNum<numOfLines; lineNum++){
             int y = startingYOffset + lineNum*lineSpacing;
