@@ -8,10 +8,7 @@ import java.awt.event.TextListener;
 
 import javax.swing.*;
 
-import alexwilton.handwritingAssistant.exercises.Exercise;
-import alexwilton.handwritingAssistant.exercises.Exercise1;
 import alexwilton.handwritingAssistant.exercises.ExerciseManager;
-import dhuckaby.NonsenseGenerator;
 
 public class DEALAssistant extends JFrame{
 
@@ -55,15 +52,18 @@ public class DEALAssistant extends JFrame{
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                strokeAnalyser.analyseStrokes();
+                strokeAnalyser.analyseStrokes(false);
             }
         });
-        JButton nextExBtn = new JButton("Next Exercise"); nextExBtn.setFont(btnFont);
+        final JButton nextExBtn = new JButton("Next Exercise"); nextExBtn.setFont(btnFont);
         nextExBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                strokeAnalyser.analyseStrokes(true);
+                myScriptConnection.waitUntilFinished();
                 exerciseManager.moveToNextExercise();
+                nextExBtn.setText((exerciseManager.isLastExercise()) ? "Restart Exercises" : "Next Exercise");
                 resetExercise();
             }
         });

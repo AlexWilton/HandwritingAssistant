@@ -12,6 +12,7 @@ public abstract class Exercise {
     protected String instruction;
     protected String textToCopy;
     private Set<Word> highlightedWords;
+    protected Map<String, Integer> wordFormingFailCount;
 
     protected boolean caseSensitiveChecking = true;
 
@@ -25,7 +26,8 @@ public abstract class Exercise {
 
     public void draw(Graphics2D g){
         g.setFont(new Font("Droid Sans", Font.PLAIN, 25));
-        String exText = getClass().getSimpleName().replaceAll("(?<=\\D)(?=\\d)", " ");
+        //first regex adds space before numbers. second regex adds space before capital
+        String exText = getClass().getSimpleName().replaceAll("(?<=\\D)(?=\\d)", " ").replaceAll("([A-Z])", " $1");
         g.drawString(exText, calculateXforCentringString(g, exText), 50);
     }
 
@@ -81,14 +83,14 @@ public abstract class Exercise {
      * Use ordered list of recognised words to generate visual feedback
      * @param recognisedWords
      */
-    public void generateFeedback(List<Word> recognisedWords, StrokeAnalyser strokeAnalyser) {
+    public void generateFeedback(List<Word> recognisedWords, StrokeAnalyser strokeAnalyser, boolean recordFailedWordAttempts) {
         /*Highlight all non-expected words*/
         String[] targetWords = textToCopy.split(" ");
         int targetCount = targetWords.length;
         HashSet<Word> wordsToHighLight = new HashSet<>();
         for(int i=0; i<recognisedWords.size() && i<targetCount; i++){
             String writtenWord = recognisedWords.get(i).getText().replaceAll("[^a-zA-Z]", "");
-            String targetWord = targetWords[i].replaceAll("[^a-zA-Z]", ""); //remove not letters from comparison.
+            String targetWord = targetWords[i].replaceAll("[^a-zA-Z]", ""); //remove non-letters from comparison.
             if(!caseSensitiveChecking){writtenWord = writtenWord.toLowerCase(); targetWord = targetWord.toLowerCase();}
             if(!targetWord.equals(writtenWord)){
                 recognisedWords.get(i).setExpected(targetWord);
@@ -98,12 +100,30 @@ public abstract class Exercise {
             //check for two words grouped as one
             if(writtenWord.contains(" ")) {
                 strokeAnalyser.setWordSeparatingDistance(strokeAnalyser.getWordSeparatingDistance() - 5);
-                strokeAnalyser.analyseStrokes();
+                strokeAnalyser.analyseStrokes(recordFailedWordAttempts);
                 highlightedWords = new HashSet<>();
                 return;
             }
 
         }
+
+        if(recordFailedWordAttempts){
+            for(Word word : wordsToHighLight){
+                String failedText = word.getExpected();
+                int currentCount = wordFormingFailCount.getOrDefault(failedText, 0);
+                wordFormingFailCount.put(failedText, currentCount + 1);
+            }
+        }
+
         highlightedWords = wordsToHighLight;
+    }
+
+    protected void drawString(Graphics g, String text, int x, int y) {
+        for (String line : text.split("\n"))
+            g.drawString(line, x, y += g.getFontMetrics().getHeight());
+    }
+
+    public void setWordFormingFailCount(Map<String, Integer> wordFormingFailCount) {
+        this.wordFormingFailCount = wordFormingFailCount;
     }
 }

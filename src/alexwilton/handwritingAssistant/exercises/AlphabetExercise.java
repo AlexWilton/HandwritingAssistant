@@ -9,12 +9,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class Exercise1 extends Exercise {
+public class AlphabetExercise extends Exercise {
     private static String instruction = "Please trace the letters underneath:";
     private static String targetText = "Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz"; //"A beautiful aroma drifted out of the kitchen from the freshly baked cakes";
     private BufferedImage alphabetImg;
 
-    public Exercise1() {
+    public AlphabetExercise() {
         super(instruction, targetText);
         setup();
     }

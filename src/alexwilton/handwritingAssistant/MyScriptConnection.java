@@ -233,4 +233,15 @@ public class MyScriptConnection {
         void handleMessage(String message);
     }
 
+
+    public void waitUntilFinished() {
+        try {
+            while(status == ConnectionStatus.STARTED)
+                Thread.sleep(50);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }

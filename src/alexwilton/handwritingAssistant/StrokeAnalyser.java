@@ -5,12 +5,11 @@ import com.myscript.cloud.sample.ws.api.*;
 import com.myscript.cloud.sample.ws.api.Stroke;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class StrokeAnalyser {
     private ExerciseManager exerciseManager;
     private MyScriptConnection myScriptConnection;
-    private ConcurrentLinkedQueue<Stroke> incomingStrokes = new ConcurrentLinkedQueue<>();
+    private List<Stroke> incomingStrokes = new LinkedList<>();
     private Canvas canvas;
     private int wordSeparatingDistance = 35;
     private List<Word> recognisedWords;
@@ -24,7 +23,7 @@ public class StrokeAnalyser {
         incomingStrokes.add(stroke);
     }
 
-    public void analyseStrokes(){
+    public void analyseStrokes(final boolean recordFailedWordAttempts){
         recognisedWords = new ArrayList<>();
         ArrayList<ArrayList<Stroke>> strokeSetList = divideStrokesIntoWords();
         for(ArrayList<Stroke> wordStrokes : strokeSetList){
@@ -36,7 +35,7 @@ public class StrokeAnalyser {
                     public void handleMessage(String text) {
                         System.out.println("Text: " + text);
                         recognisedWords.add(extractWordFromStrokes(strokesToAnalyse, text));
-                        exerciseManager.getCurrentExercise().generateFeedback(recognisedWords, StrokeAnalyser.this);
+                        exerciseManager.getCurrentExercise().generateFeedback(recognisedWords, StrokeAnalyser.this, recordFailedWordAttempts);
                         canvas.repaint();
                     }
 
@@ -123,7 +122,7 @@ public class StrokeAnalyser {
     }
 
     public void clearStroke(){
-        incomingStrokes = new ConcurrentLinkedQueue<>();
+        incomingStrokes = new LinkedList<>();
         recognisedWords = new ArrayList<>();
     }
 

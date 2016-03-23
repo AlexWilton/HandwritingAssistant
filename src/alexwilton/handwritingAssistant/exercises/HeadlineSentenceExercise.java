@@ -5,9 +5,9 @@ import dhuckaby.NonsenseGenerator;
 
 import java.awt.*;
 
-public class Exercise2 extends Exercise {
+public class HeadlineSentenceExercise extends Exercise {
 
-    public Exercise2() {
+    public HeadlineSentenceExercise() {
         instruction = "Please copy the following sentence underneath:";
         textToCopy = NonsenseGenerator.getInstance().makeHeadline();
     }
