@@ -11,30 +11,52 @@ import javax.swing.*;
 import alexwilton.handwritingAssistant.exercises.Exercise;
 import alexwilton.handwritingAssistant.exercises.RecapExercise;
 
+/**
+ * DEAL Assistant aids learners in their handwriting by providing a series of exercises.
+ * A java GUI records handwriting strokes, the strokes are analysed then visual feedback is
+ * provided to the learner to aid their learning.
+ */
 public class DEALAssistant extends JFrame{
 
-	private static final String APPLICATION_KEY = "22eda92c-10af-40d8-abea-fd4093c17d81"; //"c34e7a84-a0da-41cb-84f8-b2cf8459c3df"; //
-	private static final String RECOGNITION_CLOUD_URL = "ws://cloud.myscript.com/api/v3.0/recognition/ws/text";// "http://cloud.myscript.com/api/v3.0/recognition/rest/text/doSimpleRecognition.json";
-	private static final String HMAC_KEY = "a1fa759f-b3ce-4091-9fd4-d34bb870c601"; //"667dc91d-ce7a-4074-a74e-a4ea0a8455b8"
+    /**
+     * Application Key required for connecting to MyScript Cloud.
+     */
+	private static final String APPLICATION_KEY = "22eda92c-10af-40d8-abea-fd4093c17d81";
 
-	private Canvas canvas;
+    /**
+     * URL where MyScript Cloud service is located.
+     */
+	private static final String RECOGNITION_CLOUD_URL = "ws://cloud.myscript.com/api/v3.0/recognition/ws/text";
+
+    /**
+     * HMAC Key for hashing authentication challenges received from MyScript.
+     */
+	private static final String HMAC_KEY = "a1fa759f-b3ce-4091-9fd4-d34bb870c601";
 
     private ExerciseManager exerciseManager;
-    private StrokeAnalyser strokeAnalyser;
     private MyScriptConnection myScriptConnection;
+	private Canvas canvas;
+    private StrokeAnalyser strokeAnalyser;
 
 	public DEALAssistant() {
 		super("Hand Writing Assistant");
-        exerciseManager = ExerciseManager.createDefault();
 		setup();
 	}
 
+    /**
+     * Setup System.
+     * GUI and core application component initialisation.
+     */
 	private void setup(){
+        /* Main GUI container setup */
 		Dimension screenSize = getScreenDimension();
 		setSize(screenSize.width, screenSize.height);
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
+
+        /* Core Application components initialisation */
+        exerciseManager = ExerciseManager.createDefault();
         myScriptConnection = new MyScriptConnection(APPLICATION_KEY, HMAC_KEY, RECOGNITION_CLOUD_URL);
         strokeAnalyser = new StrokeAnalyser(exerciseManager, myScriptConnection);
         canvas = new Canvas(strokeAnalyser);
@@ -42,12 +64,19 @@ public class DEALAssistant extends JFrame{
         canvas.setExerciseManager(exerciseManager);
         canvas.setShowStrokes(true);
 
+        /* Attach canvas (displays exercises+feedback and captures strokes) and add buttons */
 		add(canvas, BorderLayout.CENTER);
         addButtons();
 	}
 
+    /**
+     * Add buttons to GUI.
+     * Add three buttons: "Check For Mistakes", "Next Exercise" and "Reset Exercise".
+     */
     private void addButtons() {
         Font btnFont = new Font("Arial", Font.PLAIN, 40);
+        JPanel btnPanel = new JPanel();
+        btnPanel.setLayout(new GridLayout(1,3));
         JButton analyseBtn = new JButton("Check For Mistakes"); analyseBtn.setFont(btnFont);
         analyseBtn.addMouseListener(new MouseAdapter() {
             @Override
@@ -56,6 +85,7 @@ public class DEALAssistant extends JFrame{
                 strokeAnalyser.analyseStrokes(false);
             }
         });
+        btnPanel.add(analyseBtn);
         final JButton nextExBtn = new JButton("Next Exercise"); nextExBtn.setFont(btnFont);
         nextExBtn.addMouseListener(new MouseAdapter() {
             @Override
@@ -65,6 +95,7 @@ public class DEALAssistant extends JFrame{
 
             }
         });
+        btnPanel.add(nextExBtn);
         JButton clearBtn = new JButton("Reset Exercise"); clearBtn.setFont(btnFont);
         clearBtn.addMouseListener(new MouseAdapter() {
             @Override
@@ -73,24 +104,9 @@ public class DEALAssistant extends JFrame{
                 resetExercise();
             }
         });
-        final TextField wordSeperatingDistance = new TextField(); wordSeperatingDistance.setFont(btnFont);
-        wordSeperatingDistance.addTextListener(new TextListener() {
-            @Override
-            public void textValueChanged(TextEvent e) {
-                try {
-                    int newVal = Integer.parseInt(wordSeperatingDistance.getText());
-                    strokeAnalyser.setWordSeparatingDistance(newVal);
-                }catch (NumberFormatException nfe){}
-            }
-        });
-        wordSeperatingDistance.setText(strokeAnalyser.getWordSeparatingDistance() + "");
-        JPanel btnPanel = new JPanel();
-        btnPanel.setLayout(new GridLayout(1,5));
-        btnPanel.add(analyseBtn);
-        btnPanel.add(nextExBtn);
-        btnPanel.add(wordSeperatingDistance);
         btnPanel.add(clearBtn);
 
+        /* Place button panel south of canvas along with some bottom padding. */
         JPanel mainVerticalPanel = new JPanel();
         mainVerticalPanel.setLayout(new BoxLayout(mainVerticalPanel, BoxLayout.Y_AXIS));
         mainVerticalPanel.add(btnPanel);
@@ -100,10 +116,16 @@ public class DEALAssistant extends JFrame{
         add(mainVerticalPanel, BorderLayout.SOUTH);
     }
 
+    /**
+     * Method defines functionailty to be performed when "Next Exercise Button" is clicked.
+     * (Note, button label changes depending on what's coming next)
+     * @param nextExBtn Next Button
+     */
     private void nextClick(JButton nextExBtn){
-        //check for next page on recap
+        /* Treat Recap Exercise differently */
         Exercise currentExercise = exerciseManager.getCurrentExercise();
         if(currentExercise instanceof RecapExercise){
+            //move to next page on recap exercise
             RecapExercise ex = (RecapExercise) currentExercise;
             if(ex.hasAnotherPage()) {
                 ex.moveToNextPage();
@@ -111,17 +133,19 @@ public class DEALAssistant extends JFrame{
                 return;
             }
         }else{
+            //for non-recap exercises, analyse strokes (recording word fails) then move to next exercise when ready.
             strokeAnalyser.analyseStrokes(true);
             myScriptConnection.waitUntilFinished();
-            exerciseManager.moveToNextExercise();
+            currentExercise = exerciseManager.getNextExecise();
         }
-        currentExercise = exerciseManager.getCurrentExercise();
 
-        if(currentExercise instanceof RecapExercise){
+        /* Label button "Next" if there exists another page on Recap Exercise.
+         * Else label button "Finish (Quit)" and close program when clicked. */
+        if(currentExercise instanceof RecapExercise) {
             RecapExercise ex = (RecapExercise) currentExercise;
-            if(ex.hasAnotherPage()){
+            if (ex.hasAnotherPage()) {
                 nextExBtn.setText("Next");
-            }else
+            } else {
                 nextExBtn.setText("Finish (Quit)");
                 nextExBtn.addMouseListener(new MouseAdapter() {
                     @Override
@@ -129,10 +153,15 @@ public class DEALAssistant extends JFrame{
                         System.exit(0);
                     }
                 });
+            }
         }
         resetExercise();
     }
 
+    /**
+     * Resets current exercise by clearing the strokes from the canvas and stroke analyser
+     * and updates the canvas.
+     */
     private void resetExercise(){
         exerciseManager.getCurrentExercise().setHighlightedWords(null);
         canvas.clearStrokes();
@@ -140,11 +169,19 @@ public class DEALAssistant extends JFrame{
         canvas.repaint();
     }
 
+    /**
+     * Get the Application's Screen Dimension
+     * @return Dimension
+     */
     public static Dimension getScreenDimension(){
 		Toolkit toolkit = Toolkit.getDefaultToolkit();
 		return toolkit.getScreenSize();
 	}
 
+    /**
+     * Create and show a DEALAssistant instance.
+     * @param args Unused.
+     */
 	public static void main(String[] args) {
         new DEALAssistant().setVisible(true);
 	}
