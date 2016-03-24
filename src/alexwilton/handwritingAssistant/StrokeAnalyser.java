@@ -53,7 +53,7 @@ public class StrokeAnalyser {
     }
 
     private ArrayList<ArrayList<Stroke>> divideStrokesIntoWords(){
-        Stroke[] strokes = incomingStrokes.toArray(new Stroke[incomingStrokes.size()]);
+        Stroke[] strokes = canvas.getStrokes().toArray(new Stroke[incomingStrokes.size()]);
         ArrayList<ArrayList<Stroke>> strokeGroups = new ArrayList<>();
         for(Stroke stroke : strokes){
             ArrayList<Stroke> closetStrokeGroup = null;

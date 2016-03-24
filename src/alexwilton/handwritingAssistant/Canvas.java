@@ -14,68 +14,91 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Canvas records strokes from learner and sends them to the Stroke Analyser. It also
+ * renders exercises along with their visual feedback.
+ */
 public class Canvas extends JComponent implements MouseListener, MouseMotionListener {
     private static final Color BACKGROUND_COLOR = Color.WHITE;
     private static final Color STROKE_COLOR = Color.BLACK;
-    private static final java.awt.Stroke STROKE_STYLE = new BasicStroke(3,BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+    private static final java.awt.Stroke STROKE_STYLE = new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
     private static final java.awt.Stroke DRAWING_STROKE_STYLE = new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 
+    /**
+     * Boolean determines whether strokes are drawn or not when captured.
+     */
     private boolean showStrokes = false;
-    private List<Stroke> strokes = new ArrayList<Stroke>();
+
+    /**
+     * Boolean used to track when a stroke is in the process of being drawn
+     */
     private boolean drawing;
-    private List<Point> pendingPoints = new ArrayList<Point>();
-    private Graphics2D g;
-    private StrokeAnalyser strokeAnalyser;
-    private ExerciseManager exerciseManager = null;
 
+    /**
+     * List of all strokes (regardless of whether strokes are being shown or not)
+     */
+    private List<Stroke> strokes = new ArrayList<>();
 
-public Canvas(StrokeAnalyser strokeAnalyser) {
+    /**
+     * List of Points which form the current stroke being formed.
+     */
+    private List<Point> pendingPoints = new ArrayList<>();
+
+    /**
+     * Exercise Manager allows canvas to access and render current exercise.
+     */
+    private ExerciseManager exerciseManager;
+
+    public Canvas() {
+        /* Assign Mouse+MouseMotion Listeners */
         addMouseListener(this);
         addMouseMotionListener(this);
         setDoubleBuffered(true);
-        this.strokeAnalyser = strokeAnalyser;
     }
 
+    /**
+     * Paint Component is automatically called to render the canvas.
+     * @param g0 Graphics which used for rendering canvas
+     */
     @Override
     protected void paintComponent(Graphics g0) {
-        g = (Graphics2D) g0;
-
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT);
-
+        /* Graphics setup */
+        Graphics2D g = (Graphics2D) g0;
         g.setColor(BACKGROUND_COLOR);
         g.fillRect(0, 0, getWidth(), getHeight());
-
         g.setColor(STROKE_COLOR);
         g.setStroke(STROKE_STYLE);
 
-        if(exerciseManager != null) exerciseManager.getCurrentExercise().draw(g);
+        /* Draw Current Exercise */
+        if (exerciseManager != null) exerciseManager.getCurrentExercise().draw(g);
 
+        /* If allowed, draw strokes (including semi-formed stroke in progress) */
         if (!strokes.isEmpty() && showStrokes) {
             Iterator<Stroke> iterator = strokes.iterator();
             while (iterator.hasNext()) {
                 Stroke stroke = iterator.next();
                 List<Point> pointsAsList = Arrays.asList(stroke.getPoints());
-                drawPoints(g, pointsAsList);
+                drawLineUsingPoints(g, pointsAsList);
             }
         }
-
         if (!pendingPoints.isEmpty() && showStrokes) {
             g.setStroke(DRAWING_STROKE_STYLE);
-            drawPoints(g, pendingPoints);
+            drawLineUsingPoints(g, pendingPoints);
         }
 
     }
 
-    private void drawPoints(Graphics2D g, List<Point> points) {
+    /**
+     * Given a list of point, draw them on as a single continous line on the graphics
+     * @param g Graphics2D to draw on
+     * @param points List of points.
+     */
+    private void drawLineUsingPoints(Graphics2D g, List<Point> points) {
         if (points != null && points.size() > 0) {
             Point previous = points.get(0);
             if (points.size() == 1) {
                 g.fillRect((int) previous.x, (int) previous.y, 1, 1);
             } else {
-                // first point already handled
                 for (int i = 0; ++i < points.size(); ) {
                     Point current = points.get(i);
                     g.drawLine((int) previous.x, (int) previous.y, (int) current.x, (int) current.y);
@@ -97,9 +120,8 @@ public Canvas(StrokeAnalyser strokeAnalyser) {
     public void mouseReleased(MouseEvent e) {
         if (drawing) {
             addPendingPoint(e);
-            Stroke resultingStroke = finalizePendingStroke();
+            finalizePendingStroke();
             drawing = false;
-            triggerRecognizer(resultingStroke);
         }
     }
 
@@ -114,12 +136,21 @@ public Canvas(StrokeAnalyser strokeAnalyser) {
         return stroke;
     }
 
+    /**
+     * Get a tight fitting rectangle containing stroke
+     * @param stroke Stroke
+     * @return Rectangle
+     */
     private Rectangle getBoundingBox(Stroke stroke) {
         Box bbox = stroke.getBoundingBox();
         return new Rectangle(bbox.x - 1, bbox.y - 1, bbox.width + 2,
                 bbox.height + 2);
     }
 
+    /**
+     * Add Pending Point.
+     * @param e MouseEvent from which pending point can be extracted.
+     */
     private void addPendingPoint(MouseEvent e) {
         Point lastPoint;
         Point newPoint = new Point(e.getX(), e.getY());
@@ -128,18 +159,16 @@ public Canvas(StrokeAnalyser strokeAnalyser) {
         } else {
             lastPoint = newPoint;
         }
+
+        /* Add to pending points then redraw area containing it*/
         pendingPoints.add(newPoint);
         if (drawing) {
-            Stroke fake = new Stroke(new Point[]{newPoint, lastPoint});
-            repaint(getBoundingBox(fake));
+            Stroke pendingLine = new Stroke(new Point[]{newPoint, lastPoint});
+            repaint(getBoundingBox(pendingLine));
         }
     }
 
-    private void triggerRecognizer(Stroke s) {
-        strokeAnalyser.addStroke(s);
-    }
-
-    public void clearStrokes(){
+    public void clearStrokes() {
         strokes = new ArrayList<>();
     }
 
@@ -155,12 +184,12 @@ public Canvas(StrokeAnalyser strokeAnalyser) {
     public void mouseClicked(MouseEvent arg0) {
     }
 
-    public void setExerciseManager(ExerciseManager exerciseManager) {
-        this.exerciseManager = exerciseManager;
+    public List<Stroke> getStrokes() {
+        return strokes;
     }
 
-    public boolean isShowStrokes() {
-        return showStrokes;
+    public void setExerciseManager(ExerciseManager exerciseManager) {
+        this.exerciseManager = exerciseManager;
     }
 
     public void setShowStrokes(boolean showStrokes) {

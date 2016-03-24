@@ -59,10 +59,10 @@ public class DEALAssistant extends JFrame{
         exerciseManager = ExerciseManager.createDefault();
         myScriptConnection = new MyScriptConnection(APPLICATION_KEY, HMAC_KEY, RECOGNITION_CLOUD_URL);
         strokeAnalyser = new StrokeAnalyser(exerciseManager, myScriptConnection);
-        canvas = new Canvas(strokeAnalyser);
-        strokeAnalyser.setCanvas(canvas);
+        canvas = new Canvas();
         canvas.setExerciseManager(exerciseManager);
         canvas.setShowStrokes(true);
+        strokeAnalyser.setCanvas(canvas);
 
         /* Attach canvas (displays exercises+feedback and captures strokes) and add buttons */
 		add(canvas, BorderLayout.CENTER);
