@@ -41,37 +41,35 @@ public class ExerciseManager {
     }
 
 
-
+    /**
+     * Change current exercise to the next exercise.
+     * If last exercise, make no change.
+     */
     public void moveToNextExercise(){
-        currentExerciseIndex++;
-        if(currentExerciseIndex >= exercises.size()) currentExerciseIndex = currentExerciseIndex % exercises.size();
-        if(currentExerciseIndex == 0){
-            wordFormingFailCount = new HashMap<>();
-            for(Exercise ex : exercises){
-                if(ex instanceof RecapExercise){
-                    exercises.remove(ex);
-                    RecapExercise newRecap = new RecapExercise();
-                    newRecap.setWordFormingFailCount(wordFormingFailCount);
-                    exercises.add(newRecap);
-                    break;
-                }
-            }
-        }
+        if(!isLastExercise()) currentExerciseIndex++;
     }
 
+    /**
+     * Move to next exercise.
+     * @return New Current Exercise.
+     */
     public Exercise getNextExecise(){
         moveToNextExercise();
         return getCurrentExercise();
     }
 
+    /**
+     * Returns current exercise
+     * @return Current Exercise.
+     */
     public Exercise getCurrentExercise(){
         return exercises.get(currentExerciseIndex);
     }
 
-    public int getCurrentExerciseNumber(){
-        return currentExerciseIndex + 1;
-    }
-
+    /**
+     * Is Last Exercise?
+     * @return Whether current exercise is the last exercise.
+     */
     public boolean isLastExercise(){
         return exercises.size() == currentExerciseIndex+1;
     }
