@@ -1,4 +1,9 @@
-package alexwilton.handwritingAssistant.exercises;
+package alexwilton.handwritingAssistant;
+
+import alexwilton.handwritingAssistant.exercises.AlphabetExercise;
+import alexwilton.handwritingAssistant.exercises.Exercise;
+import alexwilton.handwritingAssistant.exercises.HeadlineSentenceExercise;
+import alexwilton.handwritingAssistant.exercises.RecapExercise;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,21 +27,14 @@ public class ExerciseManager {
     public static ExerciseManager createDefault(){
         ExerciseManager exerciseManager = new ExerciseManager();
         List<Exercise> exercises = new ArrayList<>();
-//        exercises.add(new AlphabetExercise());
-//        exercises.add(new HeadlineSentenceExercise());
-//        exercises.add(new HeadlineSentenceExercise());
+        exercises.add(new AlphabetExercise());
+        exercises.add(new HeadlineSentenceExercise());
+        exercises.add(new HeadlineSentenceExercise());
         exercises.add(new HeadlineSentenceExercise());
         exercises.add(new RecapExercise());
         exerciseManager.currentExerciseIndex = 0;
         exerciseManager.exercises = exercises;
         exerciseManager.wordFormingFailCount = new HashMap<>();
-        exerciseManager.wordFormingFailCount.put("test", 2);
-        exerciseManager.wordFormingFailCount.put("man", 1);
-        exerciseManager.wordFormingFailCount.put("manager", 4);
-        exerciseManager.wordFormingFailCount.put("lone", 2);
-        exerciseManager.wordFormingFailCount.put("gone", 1);
-        exerciseManager.wordFormingFailCount.put("unordered", 4);
-        exerciseManager.wordFormingFailCount.put("sorted", 4);
         //track word fail count across all exercises together
         for(Exercise ex : exercises){ ex.setWordFormingFailCount(exerciseManager.wordFormingFailCount);}
         return exerciseManager;

@@ -24,6 +24,10 @@ public abstract class Exercise {
     public Exercise() {}
 
 
+    /**
+     * Draw Exercise on Canvas in the exercise area of the gui.
+     * @param g Graphics which the exercise is drawn on.
+     */
     public void draw(Graphics2D g){
         g.setFont(new Font("Droid Sans", Font.PLAIN, 25));
         //first regex adds space before numbers. second regex adds space before capital

@@ -9,7 +9,6 @@ import java.awt.event.TextListener;
 import javax.swing.*;
 
 import alexwilton.handwritingAssistant.exercises.Exercise;
-import alexwilton.handwritingAssistant.exercises.ExerciseManager;
 import alexwilton.handwritingAssistant.exercises.RecapExercise;
 
 public class DEALAssistant extends JFrame{
@@ -108,18 +107,29 @@ public class DEALAssistant extends JFrame{
             RecapExercise ex = (RecapExercise) currentExercise;
             if(ex.hasAnotherPage()) {
                 ex.moveToNextPage();
-                if(!ex.hasAnotherPage()) {
-                    nextExBtn.setText("Restart");
-                }
-                resetExercise(); return;
+                resetExercise();
+                return;
             }
+        }else{
+            strokeAnalyser.analyseStrokes(true);
+            myScriptConnection.waitUntilFinished();
+            exerciseManager.moveToNextExercise();
         }
-
-        strokeAnalyser.analyseStrokes(true);
-        myScriptConnection.waitUntilFinished();
-        exerciseManager.moveToNextExercise();
         currentExercise = exerciseManager.getCurrentExercise();
-        if(currentExercise instanceof RecapExercise && ((RecapExercise) currentExercise).hasAnotherPage()) nextExBtn.setText("Next");
+
+        if(currentExercise instanceof RecapExercise){
+            RecapExercise ex = (RecapExercise) currentExercise;
+            if(ex.hasAnotherPage()){
+                nextExBtn.setText("Next");
+            }else
+                nextExBtn.setText("Finish (Quit)");
+                nextExBtn.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        System.exit(0);
+                    }
+                });
+        }
         resetExercise();
     }
 

@@ -1,6 +1,5 @@
 package alexwilton.handwritingAssistant;
 
-import alexwilton.handwritingAssistant.exercises.ExerciseManager;
 import com.myscript.cloud.sample.ws.api.*;
 import com.myscript.cloud.sample.ws.api.Stroke;
 
