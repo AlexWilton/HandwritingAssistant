@@ -23,6 +23,6 @@ public class HeadlineSentenceExercise extends Exercise {
         g.drawString(textToCopy, calculateXforCentringString(g, textToCopy), 150);
 
         drawLines(g);
-        highlightWords(g);
+        drawFeedback(g);
     }
 }

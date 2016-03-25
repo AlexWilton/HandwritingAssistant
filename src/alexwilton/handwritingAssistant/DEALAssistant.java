@@ -3,8 +3,6 @@ package alexwilton.handwritingAssistant;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.TextEvent;
-import java.awt.event.TextListener;
 
 import javax.swing.*;
 
@@ -80,8 +78,8 @@ public class DEALAssistant extends JFrame{
         JButton analyseBtn = new JButton("Check For Mistakes"); analyseBtn.setFont(btnFont);
         analyseBtn.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
+            public void mouseEntered(MouseEvent e) {
+                super.mouseEntered(e);
                 strokeAnalyser.analyseStrokes(false);
             }
         });
@@ -89,18 +87,17 @@ public class DEALAssistant extends JFrame{
         final JButton nextExBtn = new JButton("Next Exercise"); nextExBtn.setFont(btnFont);
         nextExBtn.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
+            public void mouseEntered(MouseEvent e) {
+                super.mouseEntered(e);
                 nextClick(nextExBtn);
-
             }
         });
         btnPanel.add(nextExBtn);
         JButton clearBtn = new JButton("Reset Exercise"); clearBtn.setFont(btnFont);
         clearBtn.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
+            public void mouseEntered(MouseEvent e) {
+                super.mouseEntered(e);
                 resetExercise();
             }
         });
@@ -149,7 +146,7 @@ public class DEALAssistant extends JFrame{
                 nextExBtn.setText("Finish (Quit)");
                 nextExBtn.addMouseListener(new MouseAdapter() {
                     @Override
-                    public void mouseClicked(MouseEvent e) {
+                    public void mouseEntered(MouseEvent e) {
                         System.exit(0);
                     }
                 });

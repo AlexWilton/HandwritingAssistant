@@ -67,7 +67,7 @@ public class RecapExercise extends Exercise {
         }
 
         drawLines(g);
-        highlightWords(g);
+        drawFeedback(g);
     }
 
     public boolean hasAnotherPage() {

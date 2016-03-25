@@ -15,14 +15,13 @@ public abstract class Exercise {
     protected Map<String, Integer> wordFormingFailCount;
 
     protected boolean caseSensitiveChecking = true;
+    private boolean showNoMistakesMessage = false;
 
+    public Exercise() {}
     public Exercise(String instruction, String textToCopy) {
         this.instruction = instruction;
         this.textToCopy = textToCopy;
     }
-
-    public Exercise() {}
-
 
     /**
      * Draw Exercise on Canvas in the exercise area of the gui.
@@ -35,10 +34,15 @@ public abstract class Exercise {
         g.drawString(exText, calculateXforCentringString(g, exText), 50);
     }
 
-    protected void highlightWords(Graphics2D g) {
+    /**
+     * Draw feedback on graphics for learner.
+     * Highlights mis-written words and states what should have been written
+     * in blue and what was written underneath.
+     * @param g Graphics to draw feedback on.
+     */
+    protected void drawFeedback(Graphics2D g) {
         if(highlightedWords == null) return;
         for(Word word : highlightedWords){
-            System.out.println("Highlighting: " + word.getText());
             g.setColor(new Color(231, 76, 60, 60));
             g.setStroke(new BasicStroke());
             g.fillRect(word.getX(), word.getY(), word.getWidth(), word.getHeight());
@@ -48,8 +52,19 @@ public abstract class Exercise {
             g.setColor(Color.BLACK);
             g.drawString(word.getText(), word.getX(), word.getY()+word.getHeight()+40);
         }
+
+        if(showNoMistakesMessage){
+            String text = "No Mistakes Detected!";
+            g.setColor(Color.GREEN);
+            g.setFont(new Font("Arial", Font.PLAIN, 35));
+            g.drawString(text, calculateXforCentringString(g,text), DEALAssistant.getScreenDimension().height-280);
+        }
     }
 
+    /**
+     * Draw five horizontal lines to act as guide lines for the learner to write on.
+     * @param g Graphics to draw on.
+     */
     protected void drawLines(Graphics2D g) {
         g.setColor(Color.GRAY);
         int startX = 10, endX = DEALAssistant.getScreenDimension().width - startX;
@@ -62,43 +77,36 @@ public abstract class Exercise {
     }
 
 
+    /**
+     * Calculate x co-ordinate which would result in a string being centred.
+     * @param g Graphics from which the font for rendering the string can be extracted
+     * @param strToCentre String to be centred
+     * @return X Co-ordinate which will result in string being centred
+     */
     protected static int calculateXforCentringString(Graphics2D g, String strToCentre){
         return DEALAssistant.getScreenDimension().width/2 - g.getFontMetrics().stringWidth(strToCentre)/2;
     }
 
 
-    public Set<Word> getHighlightedWords() {
-        return highlightedWords;
-    }
-
-    public void setHighlightedWords(Set<Word> highlightedWords) {
-        this.highlightedWords = highlightedWords;
-    }
-
-    public String getInstruction() {
-        return instruction;
-    }
-
-    public String getTextToCopy() {
-        return textToCopy;
-    }
-
     /**
-     * Use ordered list of recognised words to generate visual feedback
-     * @param recognisedWords
+     * Generate visual feedback for learner.
+     * Compare recognised words with expected words and highlight any differences.
+     * @param recognisedWords Ordered list of recognised words (created from analysed user strokes)
+     * @param strokeAnalyser Stroke Analyser (allows a reattempt of stroke analysis in cases where the word separating distance is too large)
+     * @param recordFailedWordAttempts Boolean whether failed attempts are recorded.
      */
     public void generateFeedback(List<Word> recognisedWords, StrokeAnalyser strokeAnalyser, boolean recordFailedWordAttempts) {
-        /*Highlight all non-expected words*/
+        /* Highlight all non-expected words */
         String[] targetWords = textToCopy.split(" ");
         int targetCount = targetWords.length;
-        HashSet<Word> wordsToHighLight = new HashSet<>();
+        highlightedWords = new HashSet<>();
         for(int i=0; i<recognisedWords.size() && i<targetCount; i++){
             String writtenWord = recognisedWords.get(i).getText().replaceAll("[^a-zA-Z]", "");
             String targetWord = targetWords[i].replaceAll("[^a-zA-Z]", ""); //remove non-letters from comparison.
             if(!caseSensitiveChecking){writtenWord = writtenWord.toLowerCase(); targetWord = targetWord.toLowerCase();}
             if(!targetWord.equals(writtenWord)){
                 recognisedWords.get(i).setExpected(targetWord);
-                wordsToHighLight.add(recognisedWords.get(i));
+                highlightedWords.add(recognisedWords.get(i));
             }
 
             //check for two words grouped as one
@@ -108,26 +116,34 @@ public abstract class Exercise {
                 highlightedWords = new HashSet<>();
                 return;
             }
-
         }
 
+        /* Give position affirmation to learner if no mistakes made */
+        showNoMistakesMessage = highlightedWords.size() == 0;
+
+        /* Record Failed Word Attempts (needed for Recap Exercise) */
         if(recordFailedWordAttempts){
-            for(Word word : wordsToHighLight){
+            for(Word word : highlightedWords){
                 String failedText = word.getExpected();
                 int currentCount = wordFormingFailCount.getOrDefault(failedText, 0);
                 wordFormingFailCount.put(failedText, currentCount + 1);
             }
         }
-
-        highlightedWords = wordsToHighLight;
-    }
-
-    protected void drawString(Graphics g, String text, int x, int y) {
-        for (String line : text.split("\n"))
-            g.drawString(line, x, y += g.getFontMetrics().getHeight());
     }
 
     public void setWordFormingFailCount(Map<String, Integer> wordFormingFailCount) {
         this.wordFormingFailCount = wordFormingFailCount;
+    }
+
+    public void setHighlightedWords(Set<Word> highlightedWords) {
+        this.highlightedWords = highlightedWords;
+    }
+
+    public boolean isShowNoMistakesMessage() {
+        return showNoMistakesMessage;
+    }
+
+    public void setShowNoMistakesMessage(boolean showNoMistakesMessage) {
+        this.showNoMistakesMessage = showNoMistakesMessage;
     }
 }

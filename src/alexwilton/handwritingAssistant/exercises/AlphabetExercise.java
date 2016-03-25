@@ -38,6 +38,6 @@ public class AlphabetExercise extends Exercise {
 
         g.drawImage(alphabetImg, DEALAssistant.getScreenDimension().width/2-alphabetImg.getWidth()/2 , 250, alphabetImg.getWidth(), alphabetImg.getHeight(), null);
 
-        highlightWords(g);
+        drawFeedback(g);
     }
 }

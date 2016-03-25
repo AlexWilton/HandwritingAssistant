@@ -1,5 +1,6 @@
 package alexwilton.handwritingAssistant;
 
+import alexwilton.handwritingAssistant.exercises.Exercise;
 import com.myscript.cloud.sample.ws.api.Box;
 import com.myscript.cloud.sample.ws.api.Point;
 import com.myscript.cloud.sample.ws.api.Stroke;
@@ -20,7 +21,7 @@ import java.util.List;
  */
 public class Canvas extends JComponent implements MouseListener, MouseMotionListener {
     private static final Color BACKGROUND_COLOR = Color.WHITE;
-    private static final Color STROKE_COLOR = Color.BLACK;
+    private static final Color STROKE_COLOR = Color.BLUE;
     private static final java.awt.Stroke STROKE_STYLE = new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
     private static final java.awt.Stroke DRAWING_STROKE_STYLE = new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 
@@ -73,6 +74,8 @@ public class Canvas extends JComponent implements MouseListener, MouseMotionList
         if (exerciseManager != null) exerciseManager.getCurrentExercise().draw(g);
 
         /* If allowed, draw strokes (including semi-formed stroke in progress) */
+        g.setStroke(STROKE_STYLE);
+        g.setColor(STROKE_COLOR);
         if (!strokes.isEmpty() && showStrokes) {
             Iterator<Stroke> iterator = strokes.iterator();
             while (iterator.hasNext()) {
@@ -85,11 +88,10 @@ public class Canvas extends JComponent implements MouseListener, MouseMotionList
             g.setStroke(DRAWING_STROKE_STYLE);
             drawLineUsingPoints(g, pendingPoints);
         }
-
     }
 
     /**
-     * Given a list of point, draw them on as a single continous line on the graphics
+     * Given a list of point, draw them on as a single continuous line on the graphics
      * @param g Graphics2D to draw on
      * @param points List of points.
      */
@@ -122,6 +124,13 @@ public class Canvas extends JComponent implements MouseListener, MouseMotionList
             addPendingPoint(e);
             finalizePendingStroke();
             drawing = false;
+
+            /* Remove old no mistake message if present*/
+            Exercise currentExercise = exerciseManager.getCurrentExercise();
+            if(currentExercise.isShowNoMistakesMessage()){
+                currentExercise.setShowNoMistakesMessage(false);
+                repaint();
+            }
         }
     }
 

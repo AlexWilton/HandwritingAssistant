@@ -18,10 +18,6 @@ public class StrokeAnalyser {
         this.myScriptConnection = myScriptConnection;
     }
 
-    public void addStroke(Stroke stroke){
-        incomingStrokes.add(stroke);
-    }
-
     public void analyseStrokes(final boolean recordFailedWordAttempts){
         recognisedWords = new ArrayList<>();
         ArrayList<ArrayList<Stroke>> strokeSetList = divideStrokesIntoWords();
@@ -48,8 +44,9 @@ public class StrokeAnalyser {
                 System.err.println("Couldn't recognise strokes. Exception: " + e.getClass().getSimpleName() + " Message: " + e.getMessage());
             }
         }
-        myScriptConnection.waitUntilFinished();
+        if(strokeSetList.size() > 0) myScriptConnection.waitUntilFinished();
         exerciseManager.getCurrentExercise().generateFeedback(recognisedWords, StrokeAnalyser.this, recordFailedWordAttempts);
+        canvas.repaint();
     }
 
     private ArrayList<ArrayList<Stroke>> divideStrokesIntoWords(){
@@ -82,16 +79,6 @@ public class StrokeAnalyser {
         return strokeGroups;
     }
 
-//    public void highlightWords(){
-//        ArrayList<ArrayList<Stroke>> strokeGroups = divideStrokesIntoWords();
-//        HashSet<Word> words = new HashSet<>();
-//        for(ArrayList<Stroke> strokeSet : strokeGroups){
-//            Stroke[] sArray = strokeSet.toArray(new Stroke[strokeSet.size()]);
-//            words.add(extractWordFromStrokes(sArray, ""));
-//        }
-//        exerciseManager.getCurrentExercise().setHighlightedWords(words);
-//        canvas.repaint();
-//    }
 
     private double minDistanceBetweenStrokes(Stroke s1, Stroke s2){
         double minDistance  = Double.MAX_VALUE;
