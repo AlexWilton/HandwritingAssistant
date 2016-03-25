@@ -37,6 +37,7 @@ public class MyScriptConnection {
         this.myScriptURL = myScriptURL;
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        connect();
     }
     private void connect(){
         try {
