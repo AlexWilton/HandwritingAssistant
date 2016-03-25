@@ -8,16 +8,52 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+/**
+ * Superclass for Exercise.
+ * An Exercise provides a learner with an handwriting instruction along with
+ * giving the learner feedback on how closely their handwritten strokes correspond with the expected text.
+ */
 public abstract class Exercise {
+    /**
+     * Instruction to be displayed to the leaner to inform them how to go about the task.
+     */
     protected String instruction;
+
+    /**
+     * Expected text which the learner should be writing.
+     */
     protected String textToCopy;
+
+    /**
+     * Words the exercises wants to be highlighted
+     */
     private Set<Word> highlightedWords;
+
+    /**
+     * Map for keeping track of the number of times a learner fails to form each word.
+     */
     protected Map<String, Integer> wordFormingFailCount;
 
+    /**
+     * Boolean for specifying whether a handwriting checking should be case sensitive.
+     */
     protected boolean caseSensitiveChecking = true;
+
+    /**
+     * Should a "No Mistakes Detected!" message currently be being shown.
+     */
     private boolean showNoMistakesMessage = false;
 
+    /**
+     * Constructor for Exercise to be overridden.
+     */
     public Exercise() {}
+
+    /**
+     * Constructor for Exercise which sets learner instruction and expected handwriting as text.
+     * @param instruction Instruction for learner,
+     * @param textToCopy Expected handwriting as text.
+     */
     public Exercise(String instruction, String textToCopy) {
         this.instruction = instruction;
         this.textToCopy = textToCopy;
