@@ -5,6 +5,10 @@ import dhuckaby.NonsenseGenerator;
 
 import java.awt.*;
 
+/**
+ * Headline Sentence Exercise.
+ * Exercise asks learner to hand-write a randomly generated nonsense headline sentence.
+ */
 public class HeadlineSentenceExercise extends Exercise {
 
     public HeadlineSentenceExercise() {
@@ -12,6 +16,10 @@ public class HeadlineSentenceExercise extends Exercise {
         textToCopy = NonsenseGenerator.getInstance().makeHeadline();
     }
 
+    /**
+     * Draw Headline Exercise. Draws exercise type, instruction, lines and visual feedback for learner.
+     * @param g Graphics which the exercise is drawn on.
+     */
     public void draw(Graphics2D g) {
         super.draw(g);
         g.setColor(Color.BLUE);

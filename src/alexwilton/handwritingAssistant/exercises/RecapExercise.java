@@ -11,6 +11,15 @@ import java.util.List;
  */
 public class RecapExercise extends Exercise {
 
+    /**
+     * Maximum number of words to show on a recap page.
+     */
+    private static int MAXIMUM_NUM_WORDS_PER_PAGE = 5;
+
+    /**
+     * Order List of Words which the learner failed to write in previous exercises.
+     * Entries are sorted most frequent to least frequent
+     */
     private List<Map.Entry<String, Integer>> orderedWordFails;
 
     public RecapExercise() {
@@ -18,7 +27,6 @@ public class RecapExercise extends Exercise {
         textToCopy = "";
         caseSensitiveChecking = false;
     }
-
 
     /**
      * Sort Words with the highest fail frequency first and lowest fail frequency last.
@@ -37,6 +45,11 @@ public class RecapExercise extends Exercise {
     }
 
 
+    /**
+     * Draw Recap Exercise. Draws exercise type, instruction, lines, words to copy and visual feedback for learner.
+     * @param g Graphics which the exercise is drawn on.
+     */
+    @Override
     public void draw(Graphics2D g) {
         super.draw(g);
         g.setColor(Color.BLUE);
@@ -70,14 +83,21 @@ public class RecapExercise extends Exercise {
         drawFeedback(g);
     }
 
+    /**
+     * Are there more words to show than are currently being shown on displayed recap page.
+     * @return True if another page of words exists, else false.
+     */
     public boolean hasAnotherPage() {
         if(orderedWordFails == null) sortWordFails();
-        return orderedWordFails.size() > 5;
+        return orderedWordFails.size() > MAXIMUM_NUM_WORDS_PER_PAGE;
     }
 
+    /**
+     * Move to the next page of words. (if another page exists)
+     */
     public void moveToNextPage() {
         if(hasAnotherPage())
-            orderedWordFails = orderedWordFails.subList(5, orderedWordFails.size());
+            orderedWordFails = orderedWordFails.subList(MAXIMUM_NUM_WORDS_PER_PAGE, orderedWordFails.size());
     }
 
 }

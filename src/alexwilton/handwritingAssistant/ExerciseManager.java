@@ -40,7 +40,6 @@ public class ExerciseManager {
         return exerciseManager;
     }
 
-
     /**
      * Change current exercise to the next exercise.
      * If last exercise, make no change.

@@ -122,7 +122,7 @@ public class Canvas extends JComponent implements MouseListener, MouseMotionList
     public void mouseReleased(MouseEvent e) {
         if (drawing) {
             addPendingPoint(e);
-            finalizePendingStroke();
+            finalisePendingStroke();
             drawing = false;
 
             /* Remove old no mistake message if present*/
@@ -134,7 +134,10 @@ public class Canvas extends JComponent implements MouseListener, MouseMotionList
         }
     }
 
-    private Stroke finalizePendingStroke() {
+    /**
+     * Create and store current pending points as a stroke and clear the pending points list.
+     */
+    private void finalisePendingStroke() {
         Point[] points = pendingPoints.toArray(new Point[pendingPoints.size()]);
         pendingPoints.clear();
         Stroke stroke = new Stroke(points);
@@ -142,7 +145,6 @@ public class Canvas extends JComponent implements MouseListener, MouseMotionList
         if (drawing) {
             repaint(getBoundingBox(stroke));
         }
-        return stroke;
     }
 
     /**

@@ -9,17 +9,24 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Alphabet Exercise.
+ * Asks learner to trace letters of the alphabet.
+ */
 public class AlphabetExercise extends Exercise {
     private static String instruction = "Please trace the letters underneath:";
-    private static String targetText = "Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz"; //"A beautiful aroma drifted out of the kitchen from the freshly baked cakes";
+    private static String textToCopy = "Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz";
     private BufferedImage alphabetImg;
 
     public AlphabetExercise() {
-        super(instruction, targetText);
-        setup();
+        super(instruction, textToCopy);
+        loadImageFromFile();
     }
 
-    private void setup() {
+    /**
+     * Load image of alphabet letters from file.
+     */
+    private void loadImageFromFile() {
         try {
             alphabetImg = ImageIO.read(new File("images/alphabet.png"));
         } catch (IOException e) {
@@ -28,6 +35,10 @@ public class AlphabetExercise extends Exercise {
 
     }
 
+    /**
+     * Draw Exercise. Draws exercise type, instruction, traceable image and visual feedback for learner.
+     * @param g Graphics which the exercise is drawn on.
+     */
     @Override
     public void draw(Graphics2D g) {
         super.draw(g);
