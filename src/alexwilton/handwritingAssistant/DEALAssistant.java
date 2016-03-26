@@ -156,13 +156,11 @@ public class DEALAssistant extends JFrame{
     }
 
     /**
-     * Resets current exercise by clearing the strokes from the canvas and stroke analyser
-     * and updates the canvas.
+     * Resets current exercise by clearing the strokes from the canvas and updates the canvas.
      */
     private void resetExercise(){
         exerciseManager.getCurrentExercise().setHighlightedWords(null);
         canvas.clearStrokes();
-        strokeAnalyser.clearStroke();
         canvas.repaint();
     }
 

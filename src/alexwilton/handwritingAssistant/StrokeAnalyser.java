@@ -5,21 +5,35 @@ import com.myscript.cloud.sample.ws.api.Stroke;
 
 import java.util.*;
 
+/**
+ * Stroke Analyser takes strokes from the canvas, divides them into stroke words (potential words) and analyses each
+ * stroke group separately. The analysis results are then sent to the current exercise which determines how to
+ * appropriately display feedback to the learner.
+ */
 public class StrokeAnalyser {
     private ExerciseManager exerciseManager;
     private MyScriptConnection myScriptConnection;
-    private List<Stroke> incomingStrokes = new LinkedList<>();
     private Canvas canvas;
+
+    /**
+     * Maximum allowed distance in pixels between strokes in order than a collection of
+     * strokes is considered a stroke group for analysing as a word.
+     */
     private int wordSeparatingDistance = 35;
-    private List<Word> recognisedWords;
 
     public StrokeAnalyser(ExerciseManager exerciseManager, MyScriptConnection myScriptConnection) {
         this.exerciseManager = exerciseManager;
         this.myScriptConnection = myScriptConnection;
     }
 
+    /**
+     * Strokes are extracted from the canvas. They are then divided them into stroke words (potential words) and each
+     * stroke group are analysed separately. The analysis results are then sent to the current exercise which
+     * determines how to appropriately display feedback to the learner.
+     * @param recordFailedWordAttempts Should failed word attempts be recorded.
+     */
     public void analyseStrokes(final boolean recordFailedWordAttempts){
-        recognisedWords = new ArrayList<>();
+        final List<Word> recognisedWords = new ArrayList<>();
         ArrayList<ArrayList<Stroke>> strokeSetList = divideStrokesIntoWords();
         for(ArrayList<Stroke> wordStrokes : strokeSetList){
             Stroke[] sArray = wordStrokes.toArray(new Stroke[wordStrokes.size()]);
@@ -49,8 +63,13 @@ public class StrokeAnalyser {
         canvas.repaint();
     }
 
+    /**
+     * Divide strokes into stroke groups. Any stroke which is less than the 'wordSeparatingDistance' to another stroke
+     * are in the same stroke group. A stroke group is represented by a List of Strokes.
+     * @return A List of Stroke groups.
+     */
     private ArrayList<ArrayList<Stroke>> divideStrokesIntoWords(){
-        Stroke[] strokes = canvas.getStrokes().toArray(new Stroke[incomingStrokes.size()]);
+        Stroke[] strokes = canvas.getStrokes().toArray(new Stroke[canvas.getStrokes().size()]);
         ArrayList<ArrayList<Stroke>> strokeGroups = new ArrayList<>();
         for(Stroke stroke : strokes){
             ArrayList<Stroke> closetStrokeGroup = null;
@@ -79,7 +98,12 @@ public class StrokeAnalyser {
         return strokeGroups;
     }
 
-
+    /**
+     * Calculate minimum distance between two strokes.
+     * @param s1 First Stroke.
+     * @param s2 Second Stroke.
+     * @return Minimum distance between the two strokes.
+     */
     private double minDistanceBetweenStrokes(Stroke s1, Stroke s2){
         double minDistance  = Double.MAX_VALUE;
         for(Point pt1 : s1.getPoints()){
@@ -91,6 +115,12 @@ public class StrokeAnalyser {
         return minDistance;
     }
 
+    /**
+     * Construct a word object which comprises of its strokes and the recognised text from MyScript for the strokes.
+     * @param strokes Strokes.
+     * @param text Recognised text from MyScript for the strokes.
+     * @return Word.
+     */
     private Word extractWordFromStrokes(Stroke[] strokes, String text) {
         int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, maxX = 0, maxY = 0;
         for(Stroke stroke : strokes){
@@ -106,11 +136,6 @@ public class StrokeAnalyser {
 
     public void setCanvas(Canvas canvas) {
         this.canvas = canvas;
-    }
-
-    public void clearStroke(){
-        incomingStrokes = new LinkedList<>();
-        recognisedWords = new ArrayList<>();
     }
 
     public int getWordSeparatingDistance() {
