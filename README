@@ -1,11 +1,17 @@
 #################################################
-#												#
-# 			MyScript Cloud Java Sample 			#
-#												#
+
+ 			DEAL Assistant (Java)
+
 #################################################
 
-0) Minimum Requirements: jdk 1.7 and maven2
+Minimum Requirements: jdk 1.7 and maven2
 
-1) Change your applicationKey in src/com/myscript/cloud/sample/MyScriptCloudSample.java
+#Getting Started Instructions
 
-2) mvn clean compile assembly:single exec:exec
+1) Clone or download repository.
+
+2) Open a terminal and change directory to the project directory.
+
+3) To compile into a jar, run "mvn assembly:assembly -DdescriptorId=jar-with-dependencies". A jar will be generated within the target directory.
+
+4) To execute the jar, run "java -jar target/DEALAssistant-1.0-jar-with-dependencies.jar"
