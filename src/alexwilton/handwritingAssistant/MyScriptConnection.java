@@ -99,7 +99,7 @@ public class MyScriptConnection {
 
     /**
      * On successful connection to MyScript Cloud Recognition, keep track of successful session.
-     * @param userSession
+     * @param userSession Session
      */
     @OnOpen
     public void onOpen(Session userSession) {this.userSession = userSession;}
@@ -198,7 +198,7 @@ public class MyScriptConnection {
     /**
      * From a json response from MyScript, extract text output.
      * @param json json response from MyScript.
-     * @return
+     * @return Text Output
      */
     protected String getTextOutputResult(String json) {
         TextOutput output = getTextOutputs(json);
@@ -268,12 +268,11 @@ public class MyScriptConnection {
     /**
      * Compute required value to return to the server with hmac SHA512 hash algorithm
      * It prevents from man-in-the-middle key theft.
-     * This method is provided by MyScript
-     *
-     * @applicationKey : applicationKey
-     * @hmackey :hmackey
-     * @jsonInput: textInput, mathInput, shapeInput, musicInput or AnalyzerInput
-     *
+     * This method is provided by MyScript.
+     * @param applicationKey Application Key
+     * @param hmacKey HMAC key
+     * @param jsonInput textInput, mathInput, shapeInput, musicInput or AnalyzerInput
+     * @return Required value to return to the server with hmac SHA512 hash algorithm.
      */
     private String computeHMAC(String applicationKey, String hmacKey, String jsonInput) {
         final String HMAC_SHA_512_ALGORITHM = "HmacSHA512";
@@ -297,8 +296,15 @@ public class MyScriptConnection {
         }
     }
 
+    /**
+     * Interface requiring Message Handlers to implement handleMessage().
+     */
     public interface MessageHandler{
-        void handleMessage(String message);
+        /**
+         * Method describes what to do recognition results from MyScript.
+         * @param recognisedTextFromMyscript Recognised Text From MyScript
+         */
+        void handleMessage(String recognisedTextFromMyscript);
     }
 
     /**

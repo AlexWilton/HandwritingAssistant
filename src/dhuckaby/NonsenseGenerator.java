@@ -67,7 +67,10 @@ public class NonsenseGenerator {
         mRandom = new Random();
     }
 
-    /** Produces something that reads like a headline. */
+    /**
+     * Produces something that reads like a headline.
+     * @return Headline
+     */
     public String makeHeadline() {
         return makeSentence(true);
     }
