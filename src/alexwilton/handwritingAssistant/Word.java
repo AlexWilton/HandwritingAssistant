@@ -1,11 +1,50 @@
 package alexwilton.handwritingAssistant;
 
+/**
+ * A Word object comprises of the area occupied by its strokes and the recognised text from MyScript for the strokes.
+ * The expected text for a word can be added (but is optional).
+ */
 public class Word {
-    private int x,y,width,height;
+
+    /**
+     * X co-ordinate of top-left corner.
+     */
+    private int x;
+
+    /**
+     * Y co-ordinate of top-left corner.
+     */
+    private int y;
+
+    /**
+     * Width of rectangle.
+     */
+    private int width;
+
+    /**
+     * Height of Rectangle.
+     */
+    private int height;
+
+    /**
+     * Recognised text from MyScript for the strokes.
+     */
     private String text;
-    private static final int CONTAINS_FUDGE_FACTOR = 5;
+
+    /**
+     * The expected text for a word can be added.
+     * Can be null as optional usage.
+     */
     private String expected;
 
+    /**
+     * Construct a Word object from the rectangle dimensions and text.
+     * @param x x co-ordinate of top-left corner.
+     * @param y y co-ordinate of top-left corner.
+     * @param width width of rectangle.
+     * @param height height of rectangle.
+     * @param text recognised text from MyScript for the strokes.
+     */
     public Word(int x, int y, int width, int height, String text) {
         this.x = x;
         this.y = y;
@@ -32,25 +71,6 @@ public class Word {
 
     public String getText() {
         return text;
-    }
-
-    /**
-     * Check whether word contains another word by checking 4 corners
-     * @param word
-     * @return
-     */
-    public boolean contains(Word word) {
-        int[][] pts = {{word.x, word.y}, {word.x, word.y+height}, {word.x+width, word.y}, {word.x+width, word.y+height}};
-        for(int[] pt : pts) {
-            if (contains(pt[0], pt[1])) return true;
-        }
-        return false;
-    }
-
-    public boolean contains(int ptX, int ptY){
-        if(!(x < ptX+CONTAINS_FUDGE_FACTOR && ptX-CONTAINS_FUDGE_FACTOR < x + width )) return false;
-        if(!(y < ptY+CONTAINS_FUDGE_FACTOR &&  ptY-CONTAINS_FUDGE_FACTOR < y + height )) return false;
-        return true;
     }
 
     public void setExpected(String expected) {
