@@ -20,17 +20,57 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 
+/**
+ * Class Manages connection to MyScript Cloud's stroke recognition service.
+ */
 @ClientEndpoint
 public class MyScriptConnection {
+    /**
+     * Message Handler defines what to do with recognistion results received from MyScript.
+     */
     private MessageHandler messageHandler;
-    private Session userSession = null;
-    private ObjectMapper mapper = new ObjectMapper();
-    private String applicationKey, hmacKey, myScriptURL;
-    private String currentInstanceId = null;
 
+    /**
+     * Connection Session to MyScript.
+     */
+    private Session userSession = null;
+
+    /**
+     * Object Mapper maps MyScript response json to Java objects.
+     */
+    private ObjectMapper mapper = new ObjectMapper();
+
+    /**
+     * Allowed Statuses of Connection to MyScript Cloud Recognition.
+     */
     enum ConnectionStatus { DISCONNECTED, READY_TO_START, STARTED}
+
+    /**
+     * Current connection status to MyScript Cloud Recognition.
+     */
     private ConnectionStatus status = ConnectionStatus.DISCONNECTED;
 
+    /**
+     * MyScript Cloud Recognition Application Key
+     */
+    private String applicationKey;
+
+    /**
+     * MyScript Cloud Recognition HMAC Key
+     */
+    private String hmacKey;
+
+    /**
+     * MyScript Cloud Recognition URL
+     */
+    private String myScriptURL;
+
+    /**
+     * Create MyScript Connection instance. Requires necessary connection information (provided by MyScript)
+     * @param applicationKey Application Key
+     * @param hmacKey HMAC Key
+     * @param myScriptURL MyScript Cloud Recognition URL
+     */
     public MyScriptConnection(String applicationKey, String hmacKey, String myScriptURL){
         this.applicationKey = applicationKey;
         this.hmacKey = hmacKey;
@@ -39,6 +79,10 @@ public class MyScriptConnection {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         connect();
     }
+
+    /**
+     * Attempt to connect to MyScript Cloud Recognition.
+     */
     private void connect(){
         try {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
@@ -52,13 +96,29 @@ public class MyScriptConnection {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * On successful connection to MyScript Cloud Recognition, keep track of successful session.
+     * @param userSession
+     */
     @OnOpen
     public void onOpen(Session userSession) {this.userSession = userSession;}
+
+    /**
+     * On closing of current connection to MyScript Cloud Recognition, discard current session.
+     * @param userSession Old Session
+     * @param reason Reason for session closing.
+     */
     @OnClose
     public void onClose(Session userSession, CloseReason reason) {
         this.userSession = null;
         status = ConnectionStatus.DISCONNECTED;
     }
+
+    /**
+     * On receiving message from MyScript Cloud Recognition, decide how to respond based on received message type.
+     * @param jsonMsg Message received from MyScript Cloud Recognition as json.
+     */
     @OnMessage
     public void onMessage(String jsonMsg) {
         JSONObject msg = (JSONObject) JSONValue.parse(jsonMsg);
@@ -78,8 +138,6 @@ public class MyScriptConnection {
                 status = ConnectionStatus.READY_TO_START;
                 break;
             case "textResult":
-                TextOutput textOutput = getTextOutputs(jsonMsg);
-                currentInstanceId = textOutput.getInstanceId();
                 if(messageHandler != null) {
                     String textRecognised = getTextOutputResult(jsonMsg);
                     messageHandler.handleMessage(textRecognised);
@@ -90,13 +148,20 @@ public class MyScriptConnection {
         }
     }
 
+    /**
+     * Send request to reset current recognition session.
+     */
     private void sendResetRequest() {
         JSONObject reset = new JSONObject();
         reset.put("type", "reset");
         sendMessage(reset.toJSONString());
-        currentInstanceId = null;
     }
 
+    /**
+     * Send start recognition request for provided strokes.
+     * Waits for connection to be ready before sending request.
+     * @param strokes Stroke to request analysis of.
+     */
     private void sendStartRecogRequest(Stroke[] strokes){
         waitForReady();
         JSONObject start1 = getTextInput(strokes);
@@ -111,23 +176,16 @@ public class MyScriptConnection {
 
     }
 
-    private void sendContinueRecogRequest(Stroke[] strokes){
-        waitForReady();
-        JSONObject start1 = getTextInput(strokes);
-        start1.put("type", "continue");
-        start1.put("instanceId", currentInstanceId);
-        sendMessage(start1.toJSONString());
-
-    }
-
-
+    /**
+     * Wait for connection to be ready to start recognising new strokes.
+     */
     private void waitForReady(){
         switch (status){
             case DISCONNECTED: connect();
             case STARTED:
                 while(status != ConnectionStatus.READY_TO_START){
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(10);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -137,12 +195,22 @@ public class MyScriptConnection {
         }
     }
 
+    /**
+     * From a json response from MyScript, extract text output.
+     * @param json json response from MyScript.
+     * @return
+     */
     protected String getTextOutputResult(String json) {
         TextOutput output = getTextOutputs(json);
         final int selectedCandidateIdx = output.getResult().getTextSegmentResult().getSelectedCandidateIdx();
         return output.getResult().getTextSegmentResult().getCandidates().get(selectedCandidateIdx).getLabel();
     }
 
+    /**
+     * Use mapper to construct java objects from MyScript's json response.
+     * @param json json response from MyScript.
+     * @return TextOutput object constructed from MyScript response json.
+     */
     private TextOutput getTextOutputs(String json) {
         Reader jsonReader = new StringReader(json);
         TextOutput output = null;
@@ -154,6 +222,11 @@ public class MyScriptConnection {
         return output;
     }
 
+    /**
+     * Constructs a text input object from strokes for sending to MyScript.
+     * @param strokes Strokes to be analysed.
+     * @return JSONObject in MyScript's desired format.
+     */
     private JSONObject getTextInput(Stroke[] strokes) {
         TextInput input = new TextInput();
 
@@ -172,7 +245,10 @@ public class MyScriptConnection {
         return (JSONObject) JSONValue.parse(jsonWriter.toString());
     }
 
-
+    /**
+     * Send Asynchronous message to MyScript.
+     * @param message Message as String to send to MyScript.
+     */
     private void sendMessage(String message) {
         this.userSession.getAsyncRemote().sendText(message);
     }
@@ -184,16 +260,7 @@ public class MyScriptConnection {
      * @param messageHandler Method to deal with response.
      */
     public void recognizeStrokes(Stroke[] strokeArray, final MessageHandler messageHandler) {
-        //wait for connection to be free
-        while(status == ConnectionStatus.STARTED){
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        //set message handler then send message
+        waitForReady();
         this.messageHandler = messageHandler;
         sendStartRecogRequest(strokeArray);
     }
@@ -234,7 +301,9 @@ public class MyScriptConnection {
         void handleMessage(String message);
     }
 
-
+    /**
+     * Blocking method which waits for current recognition to be finished.
+     */
     public void waitUntilFinished() {
         try {
             while(status == ConnectionStatus.STARTED)
@@ -243,6 +312,4 @@ public class MyScriptConnection {
             e.printStackTrace();
         }
     }
-
-
 }
