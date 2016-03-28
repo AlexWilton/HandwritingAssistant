@@ -87,9 +87,9 @@ public class DEALAssistant extends JFrame{
         final JButton nextExBtn = new JButton("Next Exercise"); nextExBtn.setFont(btnFont);
         nextExBtn.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e) {
-                super.mouseEntered(e);
-                nextClick(nextExBtn);
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                if(nextExBtn.contains(e.getPoint())) nextClick(nextExBtn);
             }
         });
         btnPanel.add(nextExBtn);
