@@ -1,12 +1,13 @@
-#################################################
-
-        DEAL Assistant (Java)
+#DEAL Assistant (Java)
 
 #################################################
 
 Minimum Requirements: jdk 1.7 and maven2
 
-#Getting Started Instructions
+#################################################
+
+
+##Getting Started Instructions
 
 1) Clone or download repository.
 
