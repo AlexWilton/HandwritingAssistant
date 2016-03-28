@@ -73,7 +73,6 @@ public class RecapExercise extends Exercise {
         int startingYOffset = 240;
         for(int lineNum=0; lineNum<numOfLines && lineNum<orderedWordFails.size(); lineNum++){
             String word = orderedWordFails.get(lineNum).getKey();
-            System.out.println(word + " (" + orderedWordFails.get(lineNum).getValue() + ")");
             textToCopy += (textToCopy.equals("") ? "" : " ") + word;
             int y = startingYOffset + lineNum*lineSpacing;
             g.drawString(word, startX, y);
