@@ -24,8 +24,24 @@
         <processorPath useClasspath="true" />
         <module name="MyScriptCloudSample" />
       </profile>
+      <profile default="false" name="Annotation profile for HandwritingAssistant" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="HandwritingAssistant" />
+      </profile>
+      <profile default="false" name="Annotation profile for DEALAssistant" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="DEALAssistant" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="DEALAssistant" target="1.7" />
+      <module name="HandwritingAssistant" target="1.7" />
       <module name="MyScriptCloudSample" target="1.7" />
     </bytecodeTargetLevel>
   </component>
