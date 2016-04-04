@@ -42,7 +42,6 @@ public class StrokeAnalyser {
                     private Stroke[] strokesToAnalyse;
                     @Override
                     public void handleMessage(String recognisedTextFromMyscript) {
-                        System.out.println("Text: " + recognisedTextFromMyscript);
                         recognisedWords.add(extractWordFromStrokes(strokesToAnalyse, recognisedTextFromMyscript));
                         canvas.repaint();
                     }
