@@ -19,3 +19,6 @@ provided (Alphabet, Headline Sentence and Recap Exercises). Mistakes made by the
 3) To compile into a jar, run "mvn assembly:assembly -DdescriptorId=jar-with-dependencies". A jar will be generated within the target directory.
 
 4) To execute the jar, run "java -jar target/DEALAssistant-1.0-jar-with-dependencies.jar"
+
+### Project Overview Poster
+![Digitally Enhanced hAndwriting Learning (DEAL) Assistant Poster](/ProjectDEALposter.pdf)
