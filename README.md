@@ -21,4 +21,4 @@ provided (Alphabet, Headline Sentence and Recap Exercises). Mistakes made by the
 4) To execute the jar, run "java -jar target/DEALAssistant-1.0-jar-with-dependencies.jar"
 
 ### Project Overview Poster
-![Digitally Enhanced hAndwriting Learning (DEAL) Assistant Poster](/ProjectDEALposter.pdf)
+![Digitally Enhanced hAndwriting Learning (DEAL) Assistant Poster](/ProjectDEALposter.jpg)
