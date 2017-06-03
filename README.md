@@ -1,5 +1,5 @@
-#DEAL Assistant (Java)
-###Digitally Enhanced hAndwriting Learning (DEAL) Assistant
+# DEAL Assistant (Java)
+### Digitally Enhanced hAndwriting Learning (DEAL) Assistant
 
 
 DEAL Assistant is a proof of concept system has been developed in order to explore how a futurist pen on paper could 
@@ -10,7 +10,7 @@ provided (Alphabet, Headline Sentence and Recap Exercises). Mistakes made by the
 
 `Minimum Requirements: jdk 1.7 and maven2`
 
-###Getting Started Instructions
+### Getting Started Instructions
 
 1) Clone or download repository.
 
