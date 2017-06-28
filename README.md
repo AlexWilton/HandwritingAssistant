@@ -10,6 +10,7 @@ provided (Alphabet, Headline Sentence and Recap Exercises). Mistakes made by the
 
 `Minimum Requirements: jdk 1.7 and maven2`
 
+
 ### Getting Started Instructions
 
 1) Clone or download repository.
